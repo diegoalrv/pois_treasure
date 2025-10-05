@@ -19,6 +19,7 @@
     "@deck.gl/react": "^9.1.15",
     "@loaders.gl/core": "^4.3.4",
     "@loaders.gl/json": "^4.3.4",
+    "@turf/turf": "^7.2.0",
     "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.21",
     "axios": "^1.12.2",

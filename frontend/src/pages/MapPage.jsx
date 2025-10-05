@@ -1,35 +1,42 @@
-import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
-import UserMap from "../components/MapView"; // 👈 Cambié el nombre al componente
+import { useParams } from "react-router-dom";
+import MapView from "../components/MapView";
 
 export default function MapPage() {
   const { userId } = useParams();
-  const [assignments, setAssignments] = useState([]);
+  const [geojson, setGeojson] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchAssignments() {
+    async function loadData() {
       try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/users/${userId}/assignments_geojson`
-        );
-        console.log("Assignments GeoJSON:", res.data);
-        setAssignments(res.data); // ahora es un FeatureCollection
+        setLoading(true);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/assignments_geojson`);
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        const data = await res.json();
+        setGeojson(JSON.parse(data));
       } catch (err) {
-      console.error("Error cargando POIs:", err);
-    } finally {
-      setLoading(false);
+        console.error("❌ Error fetching GeoJSON:", err);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
-  fetchAssignments();
-}, [userId]);
+    loadData();
+  }, [userId]);
 
-  if (loading) return <p style={{ textAlign: "center", marginTop: "2rem" }}>Cargando mapa...</p>;
+  if (loading) return <div>Loading map data...</div>;
+  if (!geojson) return <div>No data found for map {userId}</div>;
+
+  const handleFabClick = () => {
+    alert("Abrir modal o encuesta aquí");
+  };
 
   return (
-    <div style={{ height: "100vh", width: "100%" }}>
-      <UserMap assignments={assignments} />
-    </div>
+    <>
+      <MapView data={geojson} initialCenter={[-73.0586, -36.8274]} initialZoom={13} />
+      <button className="floating-action-button" onClick={handleFabClick}>
+        +
+      </button>
+    </>
   );
 }
