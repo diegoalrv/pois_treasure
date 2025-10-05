@@ -12,24 +12,37 @@ def join_user(data: schemas.UserJoinRequest, db: Session = Depends(get_db)):
     """
     Endpoint llamado desde el frontend cuando el usuario entra vía QR:
     - Recibe: {username: "pepe", profile: "student"}
-    - Crea un usuario con ese profile y le asigna POIs aleatorios según sus reglas.
+    - Si el usuario ya existe, lo devuelve.
+    - Si no existe, lo crea y le asigna POIs aleatorios según las reglas de su perfil.
     """
-    # 1️⃣ Validar si username ya existe
-    existing = db.query(models.User).filter(models.User.username == data.username).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="El nombre de usuario ya existe")
+    # 🔎 Buscar si ya existe el usuario
+    user = db.query(models.User).filter(models.User.username == data.username).first()
+    if user:
+        # Si ya existe devolvemos sus asignaciones
+        assigned = (
+            db.query(models.UserPOIAssignment.poi_id)
+            .filter(models.UserPOIAssignment.user_id == user.id)
+            .all()
+        )
+        assigned_pois = [a.poi_id for a in assigned]
+        return schemas.UserResponse(
+            id=user.id,
+            username=user.username,
+            profile=user.profile.name,
+            assigned_pois=assigned_pois,
+        )
 
-    # 2️⃣ Buscar el perfil por su nombre (name es unique/index)
+    # 🔎 Buscar el perfil por nombre
     profile = db.query(models.Profile).filter(models.Profile.name == data.profile).first()
     if not profile:
         raise HTTPException(status_code=404, detail=f"Perfil '{data.profile}' no encontrado")
 
-    # 3️⃣ Crear usuario
+    # ➕ Crear usuario
     user = models.User(username=data.username, profile=profile)
     db.add(user)
-    db.flush()  # obtiene user.id sin commitear aún
+    db.flush()  # obtiene user.id antes de commitear
 
-    # 4️⃣ Asignar POIs aleatorios según las reglas
+    # 🎲 Asignar POIs aleatorios según reglas
     assigned_pois = []
     rules = profile.rules or {}
     for category, count in rules.items():
@@ -42,10 +55,10 @@ def join_user(data: schemas.UserJoinRequest, db: Session = Depends(get_db)):
                     assigned_pois.append(poi.id)
 
     db.commit()
+
     return schemas.UserResponse(
         id=user.id,
         username=user.username,
-        uuid=user.uuid,        # 🔥 devolvemos el uuid generado
         profile=profile.name,
         assigned_pois=assigned_pois,
     )
