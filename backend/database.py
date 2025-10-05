@@ -10,13 +10,14 @@ except:
     pass  # En Railway no existe dotenv ni el archivo
 
 
-POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", None)
-POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
-POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", "5432"))
-POSTGRES_DB = os.getenv("POSTGRES_DB", "poisdb")
+# POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
+# POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", None)
+# POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+# POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", "5432"))
+# POSTGRES_DB = os.getenv("POSTGRES_DB", "poisdb")
 
-DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+# DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/poisdb")
 print("Connecting to database at:", DATABASE_URL)
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine, autoflush=False)
