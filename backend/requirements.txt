@@ -8,3 +8,8 @@ psycopg2-binary
 pyarrow
 pandas
 geopandas
+python-multipart
+aiofiles
+jinja2
+httpx
+pytest

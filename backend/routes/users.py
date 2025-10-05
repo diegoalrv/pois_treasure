@@ -31,6 +31,7 @@ def join_user(data: schemas.UserJoinRequest, db: Session = Depends(get_db)):
             id=user.id,
             username=user.username,
             profile=user.profile.name,
+            uuid=user.uuid,                   # ✅
             assigned_pois=assigned_pois,
         )
 
@@ -62,6 +63,7 @@ def join_user(data: schemas.UserJoinRequest, db: Session = Depends(get_db)):
         id=user.id,
         username=user.username,
         profile=profile.name,
+        uuid=user.uuid,                   # ✅
         assigned_pois=assigned_pois,
     )
 

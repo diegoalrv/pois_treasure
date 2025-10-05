@@ -1,28 +1,31 @@
 // src/components/MapView.jsx
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, memo } from "react";
 import mapboxgl from "mapbox-gl";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import * as turf from "@turf/turf";
 import "mapbox-gl/dist/mapbox-gl.css";
-import "../style.css";
+import "../css/style.css";
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 const github_raw_base =
   "https://raw.githubusercontent.com/diegoalrv/mobility-workshop/refs/heads/master";
 
-export default function MapView({
+function MapView({
   data,
   initialCenter = [-73.0586, -36.8274],
   initialZoom = 13,
 }) {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
+  const overlayRef = useRef(null);
   const [popupInfo, setPopupInfo] = useState(null);
+  const mapInitialized = useRef(false);
 
+  // Inicializar el mapa solo una vez
   useEffect(() => {
-    if (!data) return;
+    if (mapInitialized.current || !mapContainer.current) return;
 
     // ----- Crear mapa -----
     const map = new mapboxgl.Map({
@@ -34,7 +37,33 @@ export default function MapView({
 
     map.addControl(new mapboxgl.NavigationControl(), "top-right");
 
-    // ----- Crear capas Deck.gl -----
+    mapRef.current = map;
+    mapInitialized.current = true;
+
+    // ----- Ajustar vista al área -----
+    fetch(
+      `${github_raw_base}/urban_explore/pois_manager/static/geometries/area_mobility_workshop.geojson`
+    )
+      .then((r) => r.json())
+      .then((area) => {
+        const bbox = turf.bbox(area);
+        if (bbox && bbox.length === 4) {
+          map.fitBounds(bbox, { padding: 50, maxZoom: 15 });
+        }
+      })
+      .catch((e) => console.error("❌ Error al ajustar vista del área:", e));
+
+    return () => {
+      mapInitialized.current = false;
+      map.remove();
+    };
+  }, []); // Solo se ejecuta una vez
+
+  // Actualizar capas cuando cambian los datos
+  useEffect(() => {
+    if (!mapRef.current || !data) return;
+
+    // ----- Crear/Actualizar capas Deck.gl -----
     const overlay = new MapboxOverlay({
       layers: [
         // --- Área ---
@@ -43,8 +72,8 @@ export default function MapView({
           data: `${github_raw_base}/urban_explore/pois_manager/static/geometries/area_mobility_workshop.geojson`,
           stroked: true,
           filled: true,
-          getFillColor: [254, 195, 31, 25], // relleno amarillo semitransparente
-          getLineColor: [254, 195, 31, 200], // borde amarillo
+          getFillColor: [254, 195, 31, 25],
+          getLineColor: [254, 195, 31, 200],
           lineWidthMinPixels: 2,
         }),
         // --- Puntos ---
@@ -68,24 +97,20 @@ export default function MapView({
       ],
     });
 
-    map.addControl(overlay);
-    mapRef.current = map;
+    // Remover overlay anterior si existe
+    if (overlayRef.current) {
+      overlayRef.current.finalize();
+    }
 
-    // ----- Ajustar vista al área -----
-    fetch(
-      `${github_raw_base}/urban_explore/pois_manager/static/geometries/area_mobility_workshop.geojson`
-    )
-      .then((r) => r.json())
-      .then((area) => {
-        const bbox = turf.bbox(area);
-        if (bbox && bbox.length === 4) {
-          map.fitBounds(bbox, { padding: 50, maxZoom: 15 });
-        }
-      })
-      .catch((e) => console.error("❌ Error al ajustar vista del área:", e));
+    mapRef.current.addControl(overlay);
+    overlayRef.current = overlay;
 
-    return () => map.remove();
-  }, [data, initialCenter, initialZoom]);
+    return () => {
+      if (overlayRef.current) {
+        overlayRef.current.finalize();
+      }
+    };
+  }, [data]);
 
   // ----- Popup -----
   useEffect(() => {
@@ -112,3 +137,6 @@ export default function MapView({
 
   return <div ref={mapContainer} style={{ width: "100%", height: "100vh" }} />;
 }
+
+// Memo para evitar re-renders innecesarios
+export default memo(MapView);

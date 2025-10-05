@@ -1,8 +1,9 @@
 from sqlalchemy import (
-    Column, Integer, String, Text, Boolean, DateTime, ForeignKey, UniqueConstraint, Index, func
+    Column, Integer, String, Text, Boolean, DateTime, ForeignKey, UniqueConstraint, Index
 )
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from database import Base
 from datetime import datetime
 import uuid
@@ -11,13 +12,11 @@ import uuid
 class Profile(Base):
     __tablename__ = "profiles"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True, index=True)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    rules: Mapped[dict] = mapped_column(JSONB, default=dict)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False, unique=True, index=True)
+    description = Column(Text, nullable=True)
+    rules = Column(JSONB, default=dict, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     users = relationship("User", back_populates="profile")
 
@@ -26,16 +25,16 @@ class Profile(Base):
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    username: Mapped[str] = mapped_column(String(50), unique=True, index=True)
-    uuid: Mapped[str] = mapped_column(  # 🔥 nuevo campo para identificar al usuario
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    uuid = Column(
         String(36),
         unique=True,
         nullable=False,
-        default=lambda: str(uuid.uuid4()),  # genera automáticamente un UUID v4
+        default=lambda: str(uuid.uuid4())
     )
-    profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     profile = relationship("Profile", back_populates="users")
     assignments = relationship("UserPOIAssignment", back_populates="user", cascade="all, delete-orphan")
@@ -45,11 +44,11 @@ class User(Base):
 class POI(Base):
     __tablename__ = "pois"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(120), nullable=False)
-    category: Mapped[str] = mapped_column(String(50), index=True, nullable=False)
-    wkt_geometry: Mapped[str] = mapped_column(Text, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(120), nullable=False)
+    category = Column(String(50), index=True, nullable=False)
+    wkt_geometry = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     assignments = relationship("UserPOIAssignment", back_populates="poi", cascade="all, delete-orphan")
 
@@ -61,12 +60,12 @@ Index("idx_pois_category", POI.category)
 class UserPOIAssignment(Base):
     __tablename__ = "user_poi_assignments"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True, nullable=False)
-    poi_id: Mapped[int] = mapped_column(ForeignKey("pois.id"), index=True, nullable=False)
-    assigned_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    visited: Mapped[bool] = mapped_column(Boolean, default=False)
-    visited_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=False)
+    poi_id = Column(Integer, ForeignKey("pois.id"), index=True, nullable=False)
+    assigned_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    visited = Column(Boolean, default=False, nullable=False)
+    visited_at = Column(DateTime(timezone=True), nullable=True)
 
     user = relationship("User", back_populates="assignments")
     poi = relationship("POI", back_populates="assignments")
@@ -80,24 +79,24 @@ class UserPOIAssignment(Base):
 class SurveyReport(Base):
     __tablename__ = "survey_reports"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True, nullable=False)
-    title: Mapped[str] = mapped_column(String(140), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    option: Mapped[str] = mapped_column(String(80), nullable=False)
-    photo_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    wkt_point: Mapped[str] = mapped_column(Text, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=False)
+    title = Column(String(140), nullable=False)
+    description = Column(Text, nullable=True)
+    option = Column(String(80), nullable=False)
+    photo_url = Column(Text, nullable=True)
+    wkt_point = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
 # --- Tracking pasivo ---
 class UserTracking(Base):
     __tablename__ = "user_tracking"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True, nullable=False)
-    wkt_point: Mapped[str] = mapped_column(Text, nullable=False)
-    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=False)
+    wkt_point = Column(Text, nullable=False)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
 Index("idx_user_tracking_user_time", UserTracking.user_id, UserTracking.timestamp)
