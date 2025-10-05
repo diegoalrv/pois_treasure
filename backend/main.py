@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine
 from routes import users, profiles, pois, surveys, tracking
 import os
-# diegoalrv/mobility-concepcion-workshop:latest
+
 # Crear tablas
 Base.metadata.create_all(bind=engine)
 
@@ -14,35 +14,28 @@ app = FastAPI(
 )
 
 # CORS Configuration
-# En producción, Railway te dará URLs específicas
 FRONTEND_URL = os.getenv("FRONTEND_URL", "")
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 if ENVIRONMENT == "production":
-    # En producción, solo permite tu dominio de Railway
+    # En producción, lista explícita de orígenes permitidos
     origins = [
-        FRONTEND_URL,
-        "https://*.railway.app",  # Cualquier subdominio de railway
+        "https://mobility-concepcion-workshop.up.railway.app",  # Tu frontend
     ]
+    if FRONTEND_URL:
+        origins.append(FRONTEND_URL)
 else:
-    # En desarrollo, permite localhost
-    origins = [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-        FRONTEND_URL,
-        "*",  # Solo en desarrollo
-    ]
+    # En desarrollo, permite todo
+    origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins if ENVIRONMENT == "production" else ["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Health check endpoint
 @app.get("/health")
 async def health_check():
     return {
@@ -51,7 +44,6 @@ async def health_check():
         "version": "1.0.0"
     }
 
-# Root endpoint
 @app.get("/")
 async def root():
     return {
@@ -60,7 +52,6 @@ async def root():
         "health": "/health"
     }
 
-# Include routers
 app.include_router(users.router)
 app.include_router(profiles.router)
 app.include_router(pois.router)
