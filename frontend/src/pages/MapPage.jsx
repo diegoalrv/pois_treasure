@@ -12,18 +12,18 @@ export default function MapPage() {
     async function fetchAssignments() {
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/users/${userId}/assignments`
+          `${import.meta.env.VITE_API_URL}/users/${userId}/assignments_geojson`
         );
-        console.log("Assignments:", res.data);
-        setAssignments(res.data);
+        console.log("Assignments GeoJSON:", res.data);
+        setAssignments(res.data); // ahora es un FeatureCollection
       } catch (err) {
-        console.error("Error cargando POIs:", err);
-      } finally {
-        setLoading(false);
-      }
+      console.error("Error cargando POIs:", err);
+    } finally {
+      setLoading(false);
     }
-    fetchAssignments();
-  }, [userId]);
+  }
+  fetchAssignments();
+}, [userId]);
 
   if (loading) return <p style={{ textAlign: "center", marginTop: "2rem" }}>Cargando mapa...</p>;
 
