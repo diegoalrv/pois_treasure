@@ -49,4 +49,4 @@ __pycache__/
 *.venv/
 
 # Folders
-data_processing/
+data_processing/data
