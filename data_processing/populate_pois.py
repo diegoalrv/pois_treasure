@@ -7,18 +7,21 @@ import warnings
 warnings.filterwarnings("ignore")
 
 def main():
-    load_dotenv(dotenv_path="../backend/.env.local")
+    load_dotenv(dotenv_path="./.env.prod")
 
     # --- Configuración ---
-    POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
-    POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", None)
-    # POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
-    POSTGRES_HOST = "localhost"
-    POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
-    POSTGRES_DB = os.getenv("POSTGRES_DB", "poisdb")
+    DATABASE_URL = os.getenv("DATABASE_URL", None)
+    if DATABASE_URL is None:
+        # Construir la URL de la base de datos desde variables individuales
+        POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
+        POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", None)
+        # POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+        POSTGRES_HOST = "localhost"
+        POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+        POSTGRES_DB = os.getenv("POSTGRES_DB", "poisdb")
 
-    DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
-
+        DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    
     PARQUET_FILE = "data/pois_categorizados_filtrados_refinados.parquet"
 
     # --- Leer archivo ---
