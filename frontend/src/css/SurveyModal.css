@@ -149,8 +149,14 @@
   flex: 1;
 }
 
-/* Photo input */
-.photo-input-wrapper {
+/* Photo buttons */
+.photo-buttons-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.photo-button-wrapper {
   position: relative;
 }
 
@@ -161,22 +167,84 @@
   height: 0;
 }
 
-.photo-input-label {
-  display: block;
-  padding: 12px 16px;
+.photo-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 12px;
   background: #2a2a2a;
-  border: 2px dashed #666;
-  border-radius: 6px;
+  border: 2px solid #444;
+  border-radius: 8px;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s;
-  color: #aaa;
+  color: #ddd;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
-.photo-input-label:hover {
+.photo-btn:hover {
   border-color: #FEC31F;
   background: #333;
   color: #FEC31F;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(254, 195, 31, 0.2);
+}
+
+.photo-btn:active {
+  transform: translateY(0);
+}
+
+.camera-btn {
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+}
+
+.gallery-btn {
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+}
+
+/* Photo preview */
+.photo-preview-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #2a2a2a;
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid #FEC31F;
+}
+
+.photo-preview {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #000;
+}
+
+.remove-photo-btn {
+  padding: 10px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.remove-photo-btn:hover {
+  background: #cc0000;
+  transform: translateY(-1px);
+}
+
+.remove-photo-btn:active {
+  transform: translateY(0);
 }
 
 /* Submit button */
@@ -204,6 +272,13 @@
 
 .submit-btn:active {
   transform: scale(0.98);
+}
+
+.submit-btn:disabled {
+  background: #666;
+  color: #999;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* Scrollbar personalizado para el modal */
@@ -242,4 +317,19 @@
   font-size: 0.8rem;
   color: #64748b;
   font-weight: normal;
+}
+
+/* Responsive: 1 columna en móvil */
+@media (max-width: 480px) {
+  .photo-buttons-group {
+    grid-template-columns: 1fr;
+  }
+  
+  .survey-modal {
+    padding: 16px;
+  }
+  
+  .survey-modal-header h2 {
+    font-size: 1.1rem;
+  }
 }

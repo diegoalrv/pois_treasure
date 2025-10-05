@@ -9,6 +9,7 @@ export default function SurveyModal({ onClose, userId, location }) {
     photo: null,
   });
   const [submitting, setSubmitting] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState(null);
 
   const categories = [
     { value: "infrastructure", label: "Infrastructure | Infraestructura" },
@@ -25,7 +26,22 @@ export default function SurveyModal({ onClose, userId, location }) {
   };
 
   const handlePhoto = (e) => {
-    setForm({ ...form, photo: e.target.files[0] });
+    const file = e.target.files[0];
+    if (file) {
+      setForm({ ...form, photo: file });
+      
+      // Crear preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removePhoto = () => {
+    setForm({ ...form, photo: null });
+    setPhotoPreview(null);
   };
 
   const handleSubmit = async (e) => {
@@ -161,20 +177,48 @@ export default function SurveyModal({ onClose, userId, location }) {
               Insert a photo (optional)
             </label>
             <p className="form-hint">
-              Provides the sharpest and widest image possible
+              Take a photo with your camera or select from gallery
             </p>
-            <div className="photo-input-wrapper">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhoto}
-                id="photo-input"
-                className="photo-input"
-              />
-              <label htmlFor="photo-input" className="photo-input-label">
-                📷 {form.photo ? form.photo.name : "Select or capture image"}
-              </label>
-            </div>
+            
+            {!photoPreview ? (
+              <div className="photo-buttons-group">
+                {/* Botón para capturar con cámara */}
+                <div className="photo-button-wrapper">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handlePhoto}
+                    id="camera-input"
+                    className="photo-input"
+                  />
+                  <label htmlFor="camera-input" className="photo-btn camera-btn">
+                    📷 Take Photo
+                  </label>
+                </div>
+
+                {/* Botón para seleccionar archivo */}
+                <div className="photo-button-wrapper">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhoto}
+                    id="gallery-input"
+                    className="photo-input"
+                  />
+                  <label htmlFor="gallery-input" className="photo-btn gallery-btn">
+                    🖼️ Choose from Gallery
+                  </label>
+                </div>
+              </div>
+            ) : (
+              <div className="photo-preview-container">
+                <img src={photoPreview} alt="Preview" className="photo-preview" />
+                <button type="button" onClick={removePhoto} className="remove-photo-btn">
+                  🗑️ Remove Photo
+                </button>
+              </div>
+            )}
           </div>
 
           <button type="submit" className="submit-btn" disabled={submitting || !location}>
