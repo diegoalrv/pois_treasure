@@ -36,6 +36,11 @@ export default function SurveyModal({ onClose, userId, location }) {
       return;
     }
 
+    if (!form.category) {
+      alert("Por favor selecciona una categoría");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -63,21 +68,27 @@ export default function SurveyModal({ onClose, userId, location }) {
         category: form.category,
         location: { lat: location.latitude, lng: location.longitude },
         wkt_point: wktPoint,
+        has_photo: !!form.photo
       });
 
-      // TODO: Descomentar cuando tengas el endpoint configurado
-      // const response = await fetch(`${import.meta.env.VITE_API_URL}/surveys/`, {
-      //   method: "POST",
-      //   body: formData
-      // });
-      // 
-      // if (!response.ok) throw new Error('Error al enviar encuesta');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/surveys/`, {
+        method: "POST",
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Error al enviar encuesta');
+      }
 
-      alert("✅ Encuesta enviada correctamente");
+      const result = await response.json();
+      console.log("✅ Respuesta del servidor:", result);
+      
+      alert(`✅ Encuesta enviada correctamente${result.photo_uploaded ? ' con foto' : ''}`);
       onClose();
     } catch (error) {
       console.error("❌ Error enviando encuesta:", error);
-      alert("Error al enviar la encuesta. Por favor, intenta de nuevo.");
+      alert(`Error al enviar la encuesta: ${error.message}`);
     } finally {
       setSubmitting(false);
     }
@@ -125,7 +136,7 @@ export default function SurveyModal({ onClose, userId, location }) {
           {/* Pregunta 3: Choose category */}
           <div className="form-group">
             <label className="form-label">
-              Choose the appropriate category | Escoge la categoría adecuada
+              Choose the appropriate category | Escoge la categoría adecuada <span className="required">*</span>
             </label>
             <div className="radio-group">
               {categories.map((cat) => (
@@ -136,6 +147,7 @@ export default function SurveyModal({ onClose, userId, location }) {
                     value={cat.value}
                     checked={form.category === cat.value}
                     onChange={handleChange}
+                    required
                   />
                   <span className="radio-label">{cat.label}</span>
                 </label>
@@ -146,7 +158,7 @@ export default function SurveyModal({ onClose, userId, location }) {
           {/* Pregunta 4: Insert photo */}
           <div className="form-group">
             <label className="form-label">
-              Insert a photo
+              Insert a photo (optional)
             </label>
             <p className="form-hint">
               Provides the sharpest and widest image possible
