@@ -50,3 +50,6 @@ __pycache__/
 
 # Folders
 data_processing/data
+
+data_processing/.env.prod
+data_processing/.env.dev
