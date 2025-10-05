@@ -12,12 +12,6 @@ RUN npm ci --only=production
 # Copiar código fuente
 COPY . .
 
-# Build para producción con variables de entorno
-ARG VITE_API_URL
-ARG VITE_MAPBOX_TOKEN
-ENV VITE_API_URL=$VITE_API_URL
-ENV VITE_MAPBOX_TOKEN=$VITE_MAPBOX_TOKEN
-
 RUN npm run build
 
 # Production stage con Nginx
