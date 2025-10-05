@@ -4,6 +4,8 @@ from sqlalchemy import func
 from database import get_db
 import schemas, models
 import random
+import geopandas as gpd
+from shapely import wkt
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -84,6 +86,59 @@ def get_assignments(user_id: int, db: Session = Depends(get_db)):
         )
         for ua, poi in rows
     ]
+
+
+@router.get("/{user_id}/assignments_geojson")
+def get_assignments_geojson(user_id: int, db: Session = Depends(get_db)):
+    """
+    Devuelve todos los POIs asignados a un usuario en formato GeoJSON.
+    """
+    # Obtenemos la info unida de asignaciones y POIs
+    rows = (
+        db.query(models.UserPOIAssignment, models.POI)
+        .join(models.POI, models.POI.id == models.UserPOIAssignment.poi_id)
+        .filter(models.UserPOIAssignment.user_id == user_id)
+        .all()
+    )
+
+    if not rows:
+        return {"type": "FeatureCollection", "features": []}
+
+    # Creamos listas para las columnas del GeoDataFrame
+    geometries = []
+    ids = []
+    names = []
+    categories = []
+    visited = []
+    visited_at = []
+
+    for ua, poi in rows:
+        try:
+            geom = wkt.loads(poi.wkt_geometry) if poi.wkt_geometry else None
+        except Exception:
+            geom = None
+
+        geometries.append(geom)
+        ids.append(poi.id)
+        names.append(poi.name)
+        categories.append(poi.category)
+        visited.append(ua.visited)
+        visited_at.append(ua.visited_at.isoformat() if ua.visited_at else None)
+
+    gdf = gpd.GeoDataFrame(
+        {
+            "id": ids,
+            "name": names,
+            "category": categories,
+            "visited": visited,
+            "visited_at": visited_at,
+        },
+        geometry=geometries,
+        crs="EPSG:4326"  # asegúrate que tus coordenadas estén en lon/lat
+    )
+
+    # Usamos to_json para obtener un GeoJSON válido
+    return gdf.to_json()
 
 
 @router.post("/{user_id}/visit")
