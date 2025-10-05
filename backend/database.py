@@ -17,7 +17,7 @@ except:
 # POSTGRES_DB = os.getenv("POSTGRES_DB", "poisdb")
 
 # DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/poisdb")
+DATABASE_URL = os.getenv("POSTGRES_HOST", "postgresql://postgres:password@localhost:5432/poisdb")
 print("Connecting to database at:", DATABASE_URL)
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine, autoflush=False)
