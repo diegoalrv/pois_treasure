@@ -17,7 +17,7 @@ POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", "5432"))
 POSTGRES_DB = os.getenv("POSTGRES_DB", "poisdb")
 
 DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
-
+print("Connecting to database at:", DATABASE_URL)
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine, autoflush=False)
 Base = declarative_base()
