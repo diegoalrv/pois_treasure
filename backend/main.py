@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine
 from routes import users, profiles, pois, surveys, tracking
 import os
-
+# diegoalrv/mobility-concepcion-workshop:latest
 # Crear tablas
 Base.metadata.create_all(bind=engine)
 

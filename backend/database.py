@@ -1,8 +1,14 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from dotenv import load_dotenv
-load_dotenv(dotenv_path=".env.local")
+
+# En desarrollo local carga .env.local, en producción se ignora
+try:
+    from dotenv import load_dotenv
+    load_dotenv(dotenv_path=".env.local")
+except:
+    pass  # En Railway no existe dotenv ni el archivo
+
 
 POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", None)
