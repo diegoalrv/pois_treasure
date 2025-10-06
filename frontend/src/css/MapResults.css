@@ -493,7 +493,7 @@
     overflow-y: auto;
     z-index: 1000;
     order: 2;
-    padding: 4px; /* Padding ultra reducido */
+    padding: 10px; /* Padding ultra reducido */
     box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
   }
 
