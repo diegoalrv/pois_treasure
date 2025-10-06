@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import MapView from "../components/MapView";
 import SurveyModal from "../components/SurveyModal";
@@ -13,6 +13,9 @@ export default function MapPage() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
+  
+  // ⭐ Ref para controlar que tracking solo inicie una vez
+  const trackingInitialized = useRef(false);
   
   // 📍 Hook de geolocalización mejorado
   const { location, error: geoError, loading: geoLoading, permissionStatus } = useGeolocation();
@@ -35,27 +38,37 @@ export default function MapPage() {
     loadData();
   }, [userId]);
 
-  // 📍 Iniciar tracking cuando tengamos ubicación y permisos
+  // 📍 Iniciar tracking UNA SOLA VEZ cuando tengamos permisos
   useEffect(() => {
-    if (!location || !userId || permissionStatus !== 'granted') {
+    // Verificar condiciones necesarias
+    if (!userId || permissionStatus !== 'granted') {
       return;
     }
 
-    // Iniciar el servicio de tracking
-    trackingService.startTracking(userId);
-    setIsTracking(true);
+    // Solo iniciar si no se ha iniciado antes
+    if (!trackingInitialized.current) {
+      console.log('🚀 Iniciando tracking automático para user:', userId);
+      trackingService.startTracking(userId);
+      setIsTracking(true);
+      trackingInitialized.current = true;
+    }
 
+    // Cleanup: detener tracking al desmontar
     return () => {
-      // Detener tracking al desmontar el componente
-      trackingService.stopTracking();
-      setIsTracking(false);
+      if (trackingInitialized.current) {
+        console.log('🛑 Desmontando MapPage, deteniendo tracking');
+        trackingService.stopTracking();
+        setIsTracking(false);
+        trackingInitialized.current = false;
+      }
     };
-  }, [userId, location, permissionStatus]);
+  }, [userId, permissionStatus]); // ⚠️ SIN 'location' en dependencias
 
   // Manejar antes de cerrar la pestaña/navegador
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       // Enviar puntos pendientes antes de cerrar
+      console.log('⚠️ Cerrando ventana, enviando buffer...');
       trackingService.flushBuffer();
     };
 

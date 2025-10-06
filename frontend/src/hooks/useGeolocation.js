@@ -5,7 +5,7 @@ export default function useGeolocation(options = {}) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [permissionStatus, setPermissionStatus] = useState('prompt'); // 'granted', 'denied', 'prompt'
-  const watchIdRef = useRef(null);
+  const updateIntervalRef = useRef(null);
 
   useEffect(() => {
     // Verificar si el navegador soporta geolocalización
@@ -33,7 +33,7 @@ export default function useGeolocation(options = {}) {
     const geoOptions = {
       enableHighAccuracy: true,
       timeout: 10000,
-      maximumAge: 5000, // Cache de 5 segundos
+      maximumAge: 30000, // ⭐ Cache de 30 segundos (más relajado)
       ...options,
     };
 
@@ -71,31 +71,35 @@ export default function useGeolocation(options = {}) {
       setLoading(false);
     };
 
+    // ⭐ Función para actualizar ubicación
+    const updateLocation = () => {
+      navigator.geolocation.getCurrentPosition(
+        handleSuccess,
+        handleError,
+        geoOptions
+      );
+    };
+
     // Obtener ubicación inicial
     setLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      handleSuccess,
-      handleError,
-      geoOptions
-    );
+    updateLocation();
 
-    // Watchear cambios de ubicación
-    watchIdRef.current = navigator.geolocation.watchPosition(
-      handleSuccess,
-      handleError,
-      geoOptions
-    );
+    // ⭐ Actualizar ubicación cada 30 segundos (solo para el UI)
+    // El tracking real lo maneja TrackingService
+    updateIntervalRef.current = setInterval(() => {
+      updateLocation();
+    }, 30000); // 30 segundos
 
     // Cleanup
     return () => {
-      if (watchIdRef.current !== null) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
-        watchIdRef.current = null;
+      if (updateIntervalRef.current) {
+        clearInterval(updateIntervalRef.current);
+        updateIntervalRef.current = null;
       }
     };
   }, []); // Solo se ejecuta al montar
 
-  // Función para reintentar obtener ubicación
+  // Función para reintentar obtener ubicación manualmente
   const retry = () => {
     setLoading(true);
     setError(null);
@@ -114,9 +118,23 @@ export default function useGeolocation(options = {}) {
         });
         setError(null);
         setLoading(false);
+        setPermissionStatus('granted');
       },
       (err) => {
-        setError(err.message);
+        let errorMessage = 'Unknown error';
+        switch (err.code) {
+          case err.PERMISSION_DENIED:
+            errorMessage = 'Location access denied';
+            setPermissionStatus('denied');
+            break;
+          case err.POSITION_UNAVAILABLE:
+            errorMessage = 'Location information is unavailable';
+            break;
+          case err.TIMEOUT:
+            errorMessage = 'Request timed out';
+            break;
+        }
+        setError(errorMessage);
         setLoading(false);
       },
       {
