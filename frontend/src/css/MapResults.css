@@ -468,6 +468,8 @@
 }
 
 
+/* ...existing code... */
+
 /* Media queries para móvil */
 @media (max-width: 768px) {
   .map-results-container {
@@ -475,43 +477,43 @@
     height: 100vh;
   }
 
-  /* MAPA ARRIBA */
+  /* MAPA ARRIBA - 50% */
   .results-map {
     width: 100%;
-    height: 50vh; /* Más espacio para el mapa */
+    height: 50vh; /* Exactamente la mitad */
     order: 1;
   }
 
-  /* PANEL ABAJO - MÁS COMPACTO */
+  /* PANEL ABAJO - 50% */
   .results-panel {
     position: relative;
     width: 100%;
-    height: 50vh; /* Menos espacio para el panel */
+    height: 50vh; /* Exactamente la mitad */
     max-height: none;
     overflow-y: auto;
     z-index: 1000;
     order: 2;
-    padding: 8px; /* Padding muy reducido */
+    padding: 4px; /* Padding ultra reducido */
     box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
   }
 
   .results-panel.collapsed {
-    height: 50px;
+    height: 40px;
     overflow: hidden;
   }
 
   /* Botón de toggle más pequeño */
   .panel-toggle {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 28px;
-    height: 28px;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
     background: rgba(0, 0, 0, 0.8);
     color: #FEC31F;
     border: 1px solid #FEC31F;
     border-radius: 50%;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
     cursor: pointer;
     z-index: 1001;
@@ -520,293 +522,293 @@
     justify-content: center;
   }
 
-  /* Header muy compacto */
+  /* Header ultra compacto */
   .panel-header {
     padding: 0;
-    padding-right: 40px;
-    margin-bottom: 8px;
+    padding-right: 30px;
+    margin-bottom: 4px;
     border-bottom: 1px solid #FEC31F;
-    padding-bottom: 6px;
+    padding-bottom: 3px;
   }
 
   .panel-header h1 {
-    font-size: 14px;
+    font-size: 12px;
     margin: 0;
-    line-height: 1.1;
+    line-height: 1;
   }
 
   .logo-placeholder {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
 
-  /* Stats grid muy compacto */
+  /* Stats grid ultra compacto */
   .stats-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
-    margin-bottom: 8px;
+    gap: 2px;
+    margin-bottom: 4px;
   }
 
   .stat-card {
-    padding: 6px 4px;
+    padding: 3px 2px;
     text-align: center;
   }
 
   .stat-value {
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1;
   }
 
   .stat-label {
-    font-size: 9px;
-    margin-top: 2px;
+    font-size: 8px;
+    margin-top: 1px;
   }
 
-  /* Filtros muy compactos */
+  /* Filtros ultra compactos */
   .filters-section {
     padding: 0;
-    margin-bottom: 8px;
-  }
-
-  .filters-section h3 {
-    font-size: 14px;
-    margin-bottom: 6px;
-  }
-
-  .filter-group {
-    margin-bottom: 8px;
-  }
-
-  .filter-group label {
-    font-size: 12px;
-    margin-bottom: 2px;
-  }
-
-  .filter-group select {
-    padding: 6px;
-    font-size: 14px;
-  }
-
-  .checkbox-label {
-    font-size: 12px;
-    padding: 6px;
     margin-bottom: 4px;
   }
 
-  /* Color mode selector compacto */
+  .filters-section h3 {
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+
+  .filter-group {
+    margin-bottom: 4px;
+  }
+
+  .filter-group label {
+    font-size: 10px;
+    margin-bottom: 1px;
+  }
+
+  .filter-group select {
+    padding: 3px;
+    font-size: 12px;
+  }
+
+  .checkbox-label {
+    font-size: 10px;
+    padding: 3px;
+    margin-bottom: 2px;
+  }
+
+  /* Color mode selector ultra compacto */
   .color-mode-selector {
-    gap: 4px;
-    margin-top: 4px;
-    padding: 4px;
+    gap: 2px;
+    margin-top: 2px;
+    padding: 2px;
   }
 
   .radio-mode-small {
-    font-size: 10px;
-    padding: 4px 3px;
+    font-size: 8px;
+    padding: 2px 1px;
   }
 
-  /* Category distribution compacta */
+  /* Category distribution ultra compacta */
   .category-distribution {
     padding: 0;
-    margin-top: 8px;
+    margin-top: 4px;
   }
 
   .category-distribution h3 {
-    font-size: 14px;
-    margin-bottom: 6px;
+    font-size: 12px;
+    margin-bottom: 3px;
   }
 
   .category-bar {
-    margin-bottom: 6px;
+    margin-bottom: 3px;
     align-items: center;
   }
 
   .category-name {
-    width: 70px;
-    font-size: 10px;
-  }
-
-  .category-count {
-    font-size: 10px;
-    width: 25px;
-  }
-
-  .bar-container {
-    height: 6px;
-    margin: 0 4px;
-  }
-
-  /* Profile participation compacto */
-  .profile-participation-item {
-    margin-bottom: 6px;
-    padding: 6px;
-  }
-
-  .profile-name {
-    font-size: 11px;
-  }
-
-  .profile-rate {
-    font-size: 11px;
-  }
-
-  .profile-stats {
-    font-size: 9px;
-    gap: 8px;
-  }
-
-  /* Ajustes generales para elementos h3 */
-  .results-panel h3 {
-    margin: 8px 0 4px 0;
-    font-size: 14px;
-    padding-bottom: 4px;
-  }
-
-  /* Popup adjustments */
-  .result-popup {
-    max-width: 250px;
-    font-size: 12px;
-  }
-
-  .popup-photo {
-    height: 120px;
-  }
-
-  .popup-description {
-    font-size: 11px;
-    line-height: 1.3;
-  }
-
-  .popup-footer {
-    font-size: 10px;
-  }
-
-  /* Scrollbar más delgada en móvil */
-  .results-panel::-webkit-scrollbar {
-    width: 4px;
-  }
-}
-
-/* Para pantallas muy pequeñas */
-@media (max-width: 480px) {
-  .results-map {
-    height: 75vh; /* Aún más espacio para el mapa */
-  }
-
-  .results-panel {
-    height: 25vh; /* Menos espacio para el panel */
-    padding: 6px;
-  }
-
-  .results-panel.collapsed {
-    height: 40px;
-  }
-
-  .panel-header h1 {
-    font-size: 12px;
-  }
-
-  .logo-placeholder {
-    font-size: 0.9rem;
-  }
-
-  .stats-grid {
-    gap: 3px;
-  }
-
-  .stat-card {
-    padding: 4px 2px;
-  }
-
-  .stat-value {
-    font-size: 14px;
-  }
-
-  .stat-label {
+    width: 50px;
     font-size: 8px;
   }
 
-  .filters-section h3,
-  .category-distribution h3,
-  .results-panel h3 {
-    font-size: 12px;
-    margin: 6px 0 3px 0;
-  }
-
-  .filter-group select {
-    padding: 4px;
-    font-size: 12px;
-  }
-
-  .checkbox-label {
-    padding: 4px;
-    font-size: 10px;
-  }
-
-  .category-name {
-    width: 60px;
-    font-size: 9px;
-  }
-
   .category-count {
-    font-size: 9px;
+    font-size: 8px;
     width: 20px;
   }
 
   .bar-container {
     height: 4px;
+    margin: 0 2px;
   }
 
+  /* Profile participation ultra compacto */
   .profile-participation-item {
-    padding: 4px;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
+    padding: 3px;
   }
 
   .profile-name {
-    font-size: 10px;
+    font-size: 9px;
   }
 
   .profile-rate {
-    font-size: 10px;
+    font-size: 9px;
   }
 
   .profile-stats {
-    font-size: 8px;
-    gap: 6px;
+    font-size: 7px;
+    gap: 4px;
   }
 
-  .radio-mode-small {
-    font-size: 8px;
+  /* Ajustes generales para elementos h3 */
+  .results-panel h3 {
+    margin: 4px 0 2px 0;
+    font-size: 12px;
+    padding-bottom: 2px;
+  }
+
+  /* Popup adjustments */
+  .result-popup {
+    max-width: 220px;
+    font-size: 11px;
+  }
+
+  .popup-photo {
+    height: 100px;
+  }
+
+  .popup-description {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .popup-footer {
+    font-size: 9px;
+  }
+
+  /* Scrollbar más delgada en móvil */
+  .results-panel::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  /* Reducir espaciado en layer-section-title y view-mode-selector */
+  .layer-section-title {
+    font-size: 10px;
+    margin: 2px 0 2px 0;
+  }
+
+  .view-mode-selector {
+    gap: 2px;
+    margin-top: 2px;
     padding: 2px;
+  }
+
+  .radio-mode {
+    padding: 3px 4px;
+    font-size: 8px;
   }
 }
 
-/* Ajustes para landscape en móvil - panel lateral */
-@media (max-width: 768px) and (orientation: landscape) {
-  .map-results-container {
-    flex-direction: row; /* Cambiar a horizontal en landscape */
+/* Para pantallas muy pequeñas - mantener 50/50 pero aún más compacto */
+@media (max-width: 480px) {
+  .results-map {
+    height: 50vh; /* Mantener 50% */
   }
 
   .results-panel {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 280px; /* Panel lateral estrecho */
-    height: 100vh;
-    order: 1;
-    padding: 8px;
+    height: 50vh; /* Mantener 50% */
+    padding: 3px; /* Aún menos padding */
   }
 
-  .results-map {
-    width: 100%;
-    height: 100vh;
-    order: 2;
+  .results-panel.collapsed {
+    height: 35px;
   }
 
-  .panel-toggle {
-    top: 8px;
-    right: 8px;
+  .panel-header h1 {
+    font-size: 10px;
+  }
+
+  .logo-placeholder {
+    font-size: 0.7rem;
+  }
+
+  .stats-grid {
+    gap: 1px;
+  }
+
+  .stat-card {
+    padding: 2px 1px;
+  }
+
+  .stat-value {
+    font-size: 12px;
+  }
+
+  .stat-label {
+    font-size: 7px;
+  }
+
+  .filters-section h3,
+  .category-distribution h3,
+  .results-panel h3 {
+    font-size: 10px;
+    margin: 3px 0 1px 0;
+  }
+
+  .filter-group select {
+    padding: 2px;
+    font-size: 10px;
+  }
+
+  .checkbox-label {
+    padding: 2px;
+    font-size: 9px;
+  }
+
+  .category-name {
+    width: 45px;
+    font-size: 7px;
+  }
+
+  .category-count {
+    font-size: 7px;
+    width: 18px;
+  }
+
+  .bar-container {
+    height: 3px;
+  }
+
+  .profile-participation-item {
+    padding: 2px;
+    margin-bottom: 2px;
+  }
+
+  .profile-name {
+    font-size: 8px;
+  }
+
+  .profile-rate {
+    font-size: 8px;
+  }
+
+  .profile-stats {
+    font-size: 6px;
+    gap: 3px;
+  }
+
+  .radio-mode-small {
+    font-size: 7px;
+    padding: 1px;
+  }
+
+  .layer-section-title {
+    font-size: 9px;
+  }
+
+  .radio-mode {
+    font-size: 7px;
+    padding: 2px 3px;
   }
 }
+
+/* ...resto del código existente sin cambios... */
 
 /* Para tablets en portrait */
 @media (min-width: 769px) and (max-width: 1024px) {
