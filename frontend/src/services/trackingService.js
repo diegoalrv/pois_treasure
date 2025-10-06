@@ -8,15 +8,18 @@ class TrackingService {
     this.buffer = [];
     this.batchSize = 10; // Enviar cada 10 puntos
     this.intervalMs = 60000; // O cada 60 segundos
-    this.trackingIntervalMs = 60000; // ⭐ NUEVO: Capturar ubicación cada 60 segundos
+    this.trackingIntervalMs = 60000; // ⭐ Capturar ubicación cada 60 segundos
     this.minDistanceMeters = 10; // Mínimo 10m de distancia para registrar
     this.intervalId = null;
-    this.trackingIntervalId = null; // ⭐ NUEVO: ID del intervalo de captura
+    this.trackingIntervalId = null;
     this.userId = null;
     this.watchId = null;
     this.lastPosition = null;
-    this.lastCaptureTime = null; // ⭐ NUEVO: Control de última captura
+    this.lastCaptureTime = null;
     this.isTracking = false;
+    
+    // ⭐ NUEVO: Detener cualquier tracking previo al iniciar
+    this.stopAllTracking();
     
     // Cargar buffer desde localStorage al iniciar
     this.loadBufferFromStorage();
@@ -31,12 +34,18 @@ class TrackingService {
       return;
     }
 
+    // ⭐ Limpiar cualquier tracking previo
+    this.stopAllTracking();
+
     this.userId = userId;
     this.isTracking = true;
     this.lastCaptureTime = null;
 
-    // ⭐ OPCIÓN 1: Usar setInterval para capturar cada minuto
+    console.log(`📍 Iniciando tracking para user ${userId}...`);
+
+    // ⭐ Usar setInterval para capturar cada minuto
     this.trackingIntervalId = setInterval(() => {
+      console.log(`⏰ Capturando posición (intervalo: ${this.trackingIntervalMs/1000}s)`);
       this.captureCurrentPosition();
     }, this.trackingIntervalMs);
 
@@ -51,7 +60,7 @@ class TrackingService {
     // Intentar enviar buffer pendiente al iniciar
     this.flushBuffer();
 
-    console.log(`📍 Tracking iniciado para user ${userId} (captura cada ${this.trackingIntervalMs/1000}s)`);
+    console.log(`✅ Tracking iniciado (captura cada ${this.trackingIntervalMs/1000}s, flush cada ${this.intervalMs/1000}s)`);
   }
 
   /**
@@ -150,17 +159,22 @@ class TrackingService {
 
     const wktPoint = `POINT(${longitude} ${latitude})`;
     
+    // ⭐ Usar hora local de Chile (UTC-3)
+    const now = new Date();
+    const timestamp = new Date(now.getTime() - (3 * 60 * 60 * 1000)).toISOString();
+    
     const point = {
       user_id: this.userId,
       wkt_point: wktPoint,
-      timestamp: new Date().toISOString(),
+      timestamp: timestamp,
       accuracy: accuracy ? Math.round(accuracy) : null,
     };
 
     this.buffer.push(point);
     this.saveBufferToStorage();
 
-    console.log(`📌 Punto agregado al buffer (${this.buffer.length}/${this.batchSize}) - ±${accuracy}m`);
+    const localTime = new Date(timestamp).toLocaleString('es-CL');
+    console.log(`📌 Punto agregado (${this.buffer.length}/${this.batchSize}) - ${localTime} - ±${accuracy}m`);
 
     // Si alcanzamos el tamaño del batch, enviar inmediatamente
     if (this.buffer.length >= this.batchSize) {
@@ -252,23 +266,8 @@ class TrackingService {
   stopTracking() {
     if (!this.isTracking) return;
 
-    // ⭐ Detener interval de captura
-    if (this.trackingIntervalId) {
-      clearInterval(this.trackingIntervalId);
-      this.trackingIntervalId = null;
-    }
-
-    // Detener interval de flush
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
-    }
-    
-    // Detener watchPosition (ya no se usa, pero por si acaso)
-    if (this.watchId !== null) {
-      navigator.geolocation.clearWatch(this.watchId);
-      this.watchId = null;
-    }
+    console.log('🛑 Deteniendo tracking...');
+    this.stopAllTracking();
     
     // Enviar puntos restantes
     this.flushBuffer();
@@ -277,7 +276,33 @@ class TrackingService {
     this.lastPosition = null;
     this.lastCaptureTime = null;
     
-    console.log('🛑 Tracking detenido');
+    console.log('✅ Tracking detenido completamente');
+  }
+
+  /**
+   * ⭐ NUEVO: Detiene TODOS los intervalos y watchers
+   */
+  stopAllTracking() {
+    // Detener interval de captura
+    if (this.trackingIntervalId) {
+      clearInterval(this.trackingIntervalId);
+      this.trackingIntervalId = null;
+      console.log('⏹️ Intervalo de captura detenido');
+    }
+
+    // Detener interval de flush
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+      console.log('⏹️ Intervalo de flush detenido');
+    }
+    
+    // Detener watchPosition si existe
+    if (this.watchId !== null) {
+      navigator.geolocation.clearWatch(this.watchId);
+      this.watchId = null;
+      console.log('⏹️ WatchPosition detenido');
+    }
   }
 
   /**

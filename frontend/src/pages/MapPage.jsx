@@ -53,14 +53,13 @@ export default function MapPage() {
       trackingInitialized.current = true;
     }
 
-    // Cleanup: detener tracking al desmontar
+    // ⭐ Cleanup: detener tracking SOLO al desmontar el componente
     return () => {
-      if (trackingInitialized.current) {
-        console.log('🛑 Desmontando MapPage, deteniendo tracking');
-        trackingService.stopTracking();
-        setIsTracking(false);
-        trackingInitialized.current = false;
-      }
+      // Este cleanup se ejecuta cuando el componente se desmonta completamente
+      console.log('🛑 Desmontando MapPage, deteniendo tracking');
+      trackingService.stopTracking();
+      setIsTracking(false);
+      // ⚠️ NO resetear trackingInitialized aquí para evitar que se reinicie
     };
   }, [userId, permissionStatus]); // ⚠️ SIN 'location' en dependencias
 
