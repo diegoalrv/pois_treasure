@@ -7,7 +7,6 @@ from typing import Optional
 import models
 import geopandas as gpd
 from shapely import wkt
-import json
 
 router = APIRouter(prefix="/results", tags=["Results"])
 
@@ -52,17 +51,23 @@ def get_surveys_geojson(
     for survey in surveys:
         try:
             geom = wkt.loads(survey.wkt_point) if survey.wkt_point else None
-        except:
-            geom = None
+            if geom is None:
+                continue  # ⭐ Saltar puntos sin geometría
+        except Exception as e:
+            print(f"Error parsing geometry: {e}")
+            continue
         
         geometries.append(geom)
         ids.append(survey.id)
-        titles.append(survey.title)
+        titles.append(survey.title or "")
         descriptions.append(survey.description or "")
-        categories.append(survey.option)
+        categories.append(survey.option or "other")
         photo_urls.append(survey.photo_url or "")
         created_ats.append(survey.created_at.isoformat() if survey.created_at else "")
         user_ids.append(survey.user_id)
+    
+    if not geometries:
+        return {"type": "FeatureCollection", "features": []}
     
     gdf = gpd.GeoDataFrame(
         {
@@ -78,10 +83,8 @@ def get_surveys_geojson(
         crs="EPSG:4326"
     )
     
-    # ⭐ Convertir a dict en lugar de string
-    geojson_str = gdf.to_json()
-    geojson_dict = json.loads(geojson_str)
-    return geojson_dict
+    # ⭐ Retornar como string, igual que assignments_geojson
+    return gdf.to_json()
 
 
 @router.get("/tracking/geojson")
@@ -89,6 +92,7 @@ def get_tracking_geojson(
     user_id: Optional[int] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
+    limit: int = 1000,  # ⭐ Limitar resultados para evitar sobrecarga
     db: Session = Depends(get_db)
 ):
     """
@@ -105,7 +109,8 @@ def get_tracking_geojson(
     if end_date:
         query = query.filter(models.UserTracking.timestamp <= end_date)
     
-    points = query.order_by(models.UserTracking.timestamp).all()
+    # ⭐ Ordenar y limitar
+    points = query.order_by(models.UserTracking.timestamp.desc()).limit(limit).all()
     
     if not points:
         return {"type": "FeatureCollection", "features": []}
@@ -118,13 +123,20 @@ def get_tracking_geojson(
     for point in points:
         try:
             geom = wkt.loads(point.wkt_point) if point.wkt_point else None
-        except:
-            geom = None
+            if geom is None:
+                continue  # ⭐ Saltar puntos sin geometría
+        except Exception as e:
+            print(f"Error parsing geometry: {e}")
+            continue
         
         geometries.append(geom)
         ids.append(point.id)
+        # ⭐ Manejar timestamps que puedan ser None
         timestamps.append(point.timestamp.isoformat() if point.timestamp else "")
         user_ids.append(point.user_id)
+    
+    if not geometries:
+        return {"type": "FeatureCollection", "features": []}
     
     gdf = gpd.GeoDataFrame(
         {
@@ -136,10 +148,8 @@ def get_tracking_geojson(
         crs="EPSG:4326"
     )
     
-    # ⭐ Convertir a dict en lugar de string
-    geojson_str = gdf.to_json()
-    geojson_dict = json.loads(geojson_str)
-    return geojson_dict
+    # ⭐ Retornar como string, igual que assignments_geojson
+    return gdf.to_json()
 
 
 @router.get("/stats")
@@ -188,6 +198,31 @@ def get_statistics(
         .scalar()
     )
     
+    # ⭐ Participación por perfil
+    profile_participation = (
+        db.query(
+            models.Profile.name,
+            func.count(func.distinct(models.User.id)).label('total_users'),
+            func.count(func.distinct(models.SurveyReport.user_id)).label('users_with_surveys')
+        )
+        .outerjoin(models.User, models.User.profile_id == models.Profile.id)
+        .outerjoin(models.SurveyReport, models.SurveyReport.user_id == models.User.id)
+        .group_by(models.Profile.id, models.Profile.name)
+        .all()
+    )
+    
+    # ⭐ Encuestas por perfil
+    surveys_by_profile = (
+        db.query(
+            models.Profile.name,
+            func.count(models.SurveyReport.id).label('survey_count')
+        )
+        .join(models.User, models.User.profile_id == models.Profile.id)
+        .join(models.SurveyReport, models.SurveyReport.user_id == models.User.id)
+        .group_by(models.Profile.id, models.Profile.name)
+        .all()
+    )
+    
     return {
         "total_surveys": total_surveys,
         "total_tracking_points": total_tracking_points,
@@ -196,6 +231,19 @@ def get_statistics(
         "surveys_by_category": [
             {"category": cat, "count": count}
             for cat, count in category_stats
+        ],
+        "profile_participation": [
+            {
+                "profile": name,
+                "total_users": total or 0,
+                "users_with_surveys": active or 0,
+                "participation_rate": round((active / total * 100) if total > 0 else 0, 1)
+            }
+            for name, total, active in profile_participation
+        ],
+        "surveys_by_profile": [
+            {"profile": name, "count": count}
+            for name, count in surveys_by_profile
         ]
     }
 
