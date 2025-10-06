@@ -40,7 +40,8 @@ export default function MapResults() {
     category: 'all',
     showSurveys: true,
     showTracking: false,
-    showHeatmap: false,
+    surveysViewMode: 'points',  // ⭐ 'points' o 'heatmap'
+    trackingViewMode: 'points', // ⭐ 'points' o 'heatmap'
   });
 
   // ⭐ Cargar TODOS los datos UNA SOLA VEZ al montar el componente
@@ -143,56 +144,112 @@ export default function MapResults() {
       }),
     ];
 
-    // Capa de encuestas
+    // ⭐ ENCUESTAS - Puntos o Heatmap
     if (filters.showSurveys && filteredSurveysData) {
-      layers.push(
-        new GeoJsonLayer({
-          id: 'surveys',
-          data: filteredSurveysData,
-          pointRadiusMinPixels: 8,
-          pointRadiusMaxPixels: 12,
-          getFillColor: d => CATEGORY_COLORS[d.properties.category] || [255, 255, 255, 200],
-          getLineColor: [0, 0, 0, 255],
-          lineWidthMinPixels: 2,
-          pickable: true,
-          onClick: info => {
-            if (!info.object) return setPopupInfo(null);
-            const coords = info.object.geometry.coordinates;
-            const props = info.object.properties || {};
-            setPopupInfo({
-              type: 'survey',
-              coords,
-              data: props,
-            });
-          },
-        })
-      );
+      if (filters.surveysViewMode === 'heatmap') {
+        // Convertir GeoJSON a formato de heatmap [lng, lat, weight]
+        const heatmapData = filteredSurveysData.features.map(f => ({
+          coordinates: f.geometry.coordinates,
+          weight: 1
+        }));
+
+        layers.push(
+          new HeatmapLayer({
+            id: 'surveys-heatmap',
+            data: heatmapData,
+            getPosition: d => d.coordinates,
+            getWeight: d => d.weight,
+            radiusPixels: 60,
+            intensity: 1,
+            threshold: 0.05,
+            colorRange: [
+              [254, 195, 31, 0],      // Transparente
+              [254, 195, 31, 100],    // Amarillo suave
+              [255, 165, 0, 180],     // Naranja
+              [255, 69, 0, 220],      // Rojo-naranja
+              [220, 20, 60, 255]      // Rojo intenso
+            ]
+          })
+        );
+      } else {
+        // Vista de puntos normal
+        layers.push(
+          new GeoJsonLayer({
+            id: 'surveys',
+            data: filteredSurveysData,
+            pointRadiusMinPixels: 8,
+            pointRadiusMaxPixels: 12,
+            getFillColor: d => CATEGORY_COLORS[d.properties.category] || [255, 255, 255, 200],
+            getLineColor: [0, 0, 0, 255],
+            lineWidthMinPixels: 2,
+            pickable: true,
+            onClick: info => {
+              if (!info.object) return setPopupInfo(null);
+              const coords = info.object.geometry.coordinates;
+              const props = info.object.properties || {};
+              setPopupInfo({
+                type: 'survey',
+                coords,
+                data: props,
+              });
+            },
+          })
+        );
+      }
     }
 
-    // Capa de tracking
+    // ⭐ TRACKING - Puntos o Heatmap
     if (filters.showTracking && trackingData) {
-      layers.push(
-        new GeoJsonLayer({
-          id: 'tracking',
-          data: trackingData,
-          pointRadiusMinPixels: 3,
-          pointRadiusMaxPixels: 5,
-          getFillColor: [139, 92, 246, 150],
-          getLineColor: [139, 92, 246, 255],
-          lineWidthMinPixels: 1,
-          pickable: true,
-          onClick: info => {
-            if (!info.object) return setPopupInfo(null);
-            const coords = info.object.geometry.coordinates;
-            const props = info.object.properties || {};
-            setPopupInfo({
-              type: 'tracking',
-              coords,
-              data: props,
-            });
-          },
-        })
-      );
+      if (filters.trackingViewMode === 'heatmap') {
+        // Convertir GeoJSON a formato de heatmap
+        const heatmapData = trackingData.features.map(f => ({
+          coordinates: f.geometry.coordinates,
+          weight: 1
+        }));
+
+        layers.push(
+          new HeatmapLayer({
+            id: 'tracking-heatmap',
+            data: heatmapData,
+            getPosition: d => d.coordinates,
+            getWeight: d => d.weight,
+            radiusPixels: 50,
+            intensity: 1,
+            threshold: 0.03,
+            colorRange: [
+              [139, 92, 246, 0],      // Transparente
+              [139, 92, 246, 100],    // Púrpura suave
+              [124, 58, 237, 180],    // Púrpura medio
+              [109, 40, 217, 220],    // Púrpura oscuro
+              [88, 28, 135, 255]      // Púrpura intenso
+            ]
+          })
+        );
+      } else {
+        // Vista de puntos normal
+        layers.push(
+          new GeoJsonLayer({
+            id: 'tracking',
+            data: trackingData,
+            pointRadiusMinPixels: 3,
+            pointRadiusMaxPixels: 5,
+            getFillColor: [139, 92, 246, 150],
+            getLineColor: [139, 92, 246, 255],
+            lineWidthMinPixels: 1,
+            pickable: true,
+            onClick: info => {
+              if (!info.object) return setPopupInfo(null);
+              const coords = info.object.geometry.coordinates;
+              const props = info.object.properties || {};
+              setPopupInfo({
+                type: 'tracking',
+                coords,
+                data: props,
+              });
+            },
+          })
+        );
+      }
     }
 
     const overlay = new MapboxOverlay({ layers });
@@ -209,7 +266,7 @@ export default function MapResults() {
         overlayRef.current.finalize();
       }
     };
-  }, [filteredSurveysData, trackingData, filters.showSurveys, filters.showTracking]); // ⭐ Actualizar cuando cambian los filtros de visualización
+  }, [filteredSurveysData, trackingData, filters.showSurveys, filters.showTracking, filters.surveysViewMode, filters.trackingViewMode]); // ⭐ Actualizar cuando cambian los filtros de visualización
 
   // Popup
   useEffect(() => {
@@ -313,23 +370,77 @@ export default function MapResults() {
 
           {/* Capas */}
           <div className="filter-group">
+            <h4 className="layer-section-title">Encuestas</h4>
             <label className="checkbox-label">
               <input
                 type="checkbox"
                 checked={filters.showSurveys}
                 onChange={e => setFilters({...filters, showSurveys: e.target.checked})}
               />
-              Mostrar Encuestas
+              Mostrar capa de encuestas
             </label>
             
+            {filters.showSurveys && (
+              <div className="view-mode-selector">
+                <label className="radio-mode">
+                  <input
+                    type="radio"
+                    name="surveysViewMode"
+                    value="points"
+                    checked={filters.surveysViewMode === 'points'}
+                    onChange={e => setFilters({...filters, surveysViewMode: e.target.value})}
+                  />
+                  <span>📍 Puntos</span>
+                </label>
+                <label className="radio-mode">
+                  <input
+                    type="radio"
+                    name="surveysViewMode"
+                    value="heatmap"
+                    checked={filters.surveysViewMode === 'heatmap'}
+                    onChange={e => setFilters({...filters, surveysViewMode: e.target.value})}
+                  />
+                  <span>🔥 Mapa de calor</span>
+                </label>
+              </div>
+            )}
+          </div>
+
+          <div className="filter-group">
+            <h4 className="layer-section-title">Tracking GPS</h4>
             <label className="checkbox-label">
               <input
                 type="checkbox"
                 checked={filters.showTracking}
                 onChange={e => setFilters({...filters, showTracking: e.target.checked})}
               />
-              Mostrar Tracking
+              Mostrar capa de tracking
             </label>
+            
+            {filters.showTracking && (
+              <div className="view-mode-selector">
+                <label className="radio-mode">
+                  <input
+                    type="radio"
+                    name="trackingViewMode"
+                    value="points"
+                    checked={filters.trackingViewMode === 'points'}
+                    onChange={e => setFilters({...filters, trackingViewMode: e.target.value})}
+                  />
+                  <span>📍 Puntos</span>
+                </label>
+                <label className="radio-mode">
+                  <input
+                    type="radio"
+                    name="trackingViewMode"
+                    value="heatmap"
+                    checked={filters.trackingViewMode === 'heatmap'}
+                    onChange={e => setFilters({...filters, trackingViewMode: e.target.value})}
+                  />
+                  <span>🔥 Mapa de calor</span>
+                </label>
+              </div>
+            )}
           </div>
         </div>
 
