@@ -92,13 +92,21 @@ def get_tracking_geojson(
     user_id: Optional[int] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    limit: int = 1000,  # ⭐ Limitar resultados para evitar sobrecarga
+    limit: int = 10000,  # ⭐ Limitar resultados para evitar sobrecarga
     db: Session = Depends(get_db)
 ):
     """
     Retorna puntos de tracking en formato GeoJSON con filtros opcionales.
     """
-    query = db.query(models.UserTracking)
+    # ⭐ Join con User y Profile para obtener el nombre del perfil
+    query = (
+        db.query(
+            models.UserTracking,
+            models.Profile.name.label('profile_name')
+        )
+        .join(models.User, models.User.id == models.UserTracking.user_id)
+        .join(models.Profile, models.Profile.id == models.User.profile_id)
+    )
     
     if user_id:
         query = query.filter(models.UserTracking.user_id == user_id)
@@ -119,8 +127,9 @@ def get_tracking_geojson(
     ids = []
     timestamps = []
     user_ids = []
+    profile_names = []
     
-    for point in points:
+    for point, profile_name in points:
         try:
             geom = wkt.loads(point.wkt_point) if point.wkt_point else None
             if geom is None:
@@ -134,6 +143,7 @@ def get_tracking_geojson(
         # ⭐ Manejar timestamps que puedan ser None
         timestamps.append(point.timestamp.isoformat() if point.timestamp else "")
         user_ids.append(point.user_id)
+        profile_names.append(profile_name or "unknown")
     
     if not geometries:
         return {"type": "FeatureCollection", "features": []}
@@ -143,6 +153,7 @@ def get_tracking_geojson(
             "id": ids,
             "timestamp": timestamps,
             "user_id": user_ids,
+            "profile_name": profile_names,  # ⭐ Nuevo campo
         },
         geometry=geometries,
         crs="EPSG:4326"
