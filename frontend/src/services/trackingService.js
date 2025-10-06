@@ -8,11 +8,14 @@ class TrackingService {
     this.buffer = [];
     this.batchSize = 10; // Enviar cada 10 puntos
     this.intervalMs = 60000; // O cada 60 segundos
+    this.trackingIntervalMs = 60000; // ⭐ NUEVO: Capturar ubicación cada 60 segundos
     this.minDistanceMeters = 10; // Mínimo 10m de distancia para registrar
     this.intervalId = null;
+    this.trackingIntervalId = null; // ⭐ NUEVO: ID del intervalo de captura
     this.userId = null;
     this.watchId = null;
     this.lastPosition = null;
+    this.lastCaptureTime = null; // ⭐ NUEVO: Control de última captura
     this.isTracking = false;
     
     // Cargar buffer desde localStorage al iniciar
@@ -30,20 +33,15 @@ class TrackingService {
 
     this.userId = userId;
     this.isTracking = true;
+    this.lastCaptureTime = null;
 
-    // Configurar geolocalización con alta precisión
-    const geoOptions = {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0,
-    };
+    // ⭐ OPCIÓN 1: Usar setInterval para capturar cada minuto
+    this.trackingIntervalId = setInterval(() => {
+      this.captureCurrentPosition();
+    }, this.trackingIntervalMs);
 
-    // Watchear cambios de ubicación
-    this.watchId = navigator.geolocation.watchPosition(
-      (position) => this.handlePositionUpdate(position),
-      (error) => this.handlePositionError(error),
-      geoOptions
-    );
+    // Capturar posición inicial inmediatamente
+    this.captureCurrentPosition();
 
     // Enviar batch periódicamente
     this.intervalId = setInterval(() => {
@@ -53,7 +51,24 @@ class TrackingService {
     // Intentar enviar buffer pendiente al iniciar
     this.flushBuffer();
 
-    console.log(`📍 Tracking iniciado para user ${userId}`);
+    console.log(`📍 Tracking iniciado para user ${userId} (captura cada ${this.trackingIntervalMs/1000}s)`);
+  }
+
+  /**
+   * ⭐ NUEVO: Captura la posición actual usando getCurrentPosition
+   */
+  captureCurrentPosition() {
+    const geoOptions = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => this.handlePositionUpdate(position),
+      (error) => this.handlePositionError(error),
+      geoOptions
+    );
   }
 
   /**
@@ -86,6 +101,7 @@ class TrackingService {
     // Agregar punto al buffer
     this.addPoint(latitude, longitude, accuracy);
     this.lastPosition = { latitude, longitude };
+    this.lastCaptureTime = Date.now();
   }
 
   /**
@@ -236,13 +252,19 @@ class TrackingService {
   stopTracking() {
     if (!this.isTracking) return;
 
-    // Detener interval
+    // ⭐ Detener interval de captura
+    if (this.trackingIntervalId) {
+      clearInterval(this.trackingIntervalId);
+      this.trackingIntervalId = null;
+    }
+
+    // Detener interval de flush
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
     
-    // Detener watchPosition
+    // Detener watchPosition (ya no se usa, pero por si acaso)
     if (this.watchId !== null) {
       navigator.geolocation.clearWatch(this.watchId);
       this.watchId = null;
@@ -253,6 +275,7 @@ class TrackingService {
     
     this.isTracking = false;
     this.lastPosition = null;
+    this.lastCaptureTime = null;
     
     console.log('🛑 Tracking detenido');
   }
@@ -267,6 +290,8 @@ class TrackingService {
       bufferSize: this.buffer.length,
       batchSize: this.batchSize,
       lastPosition: this.lastPosition,
+      lastCaptureTime: this.lastCaptureTime,
+      trackingIntervalMs: this.trackingIntervalMs,
     };
   }
 

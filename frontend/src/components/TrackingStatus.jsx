@@ -59,7 +59,7 @@ export default function TrackingStatus({ location, isTracking }) {
         )}
       </div>
 
-      {/* Notificación de sincronización */}
+      {/* Notificación de sincronización
       {syncStatus && (
         <div className={`sync-notification ${syncStatus.success ? 'success' : 'error'}`}>
           {syncStatus.success ? (
@@ -74,7 +74,7 @@ export default function TrackingStatus({ location, isTracking }) {
             </>
           )}
         </div>
-      )}
+      )} */}
 
       {/* Botón para ocultar */}
       <button 
