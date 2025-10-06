@@ -154,18 +154,21 @@ export default function MapResults() {
           weight: 1
         }));
 
+        console.log('🔥 Heatmap Encuestas - Puntos:', heatmapData.length, heatmapData);
+
         layers.push(
           new HeatmapLayer({
             id: 'surveys-heatmap',
             data: heatmapData,
             getPosition: d => d.coordinates,
             getWeight: d => d.weight,
-            radiusPixels: 60,
-            intensity: 1,
-            threshold: 0.05,
+            radiusPixels: 100,      // ⭐ Aumentado para mayor visibilidad
+            intensity: 2,           // ⭐ Mayor intensidad
+            threshold: 0.01,        // ⭐ Umbral más bajo para mostrar más
+            aggregation: 'SUM',
             colorRange: [
-              [254, 195, 31, 0],      // Transparente
-              [254, 195, 31, 100],    // Amarillo suave
+              [254, 195, 31, 50],     // Amarillo muy suave
+              [254, 195, 31, 120],    // Amarillo suave
               [255, 165, 0, 180],     // Naranja
               [255, 69, 0, 220],      // Rojo-naranja
               [220, 20, 60, 255]      // Rojo intenso
@@ -214,12 +217,13 @@ export default function MapResults() {
             data: heatmapData,
             getPosition: d => d.coordinates,
             getWeight: d => d.weight,
-            radiusPixels: 50,
-            intensity: 1,
-            threshold: 0.03,
+            radiusPixels: 80,       // ⭐ Aumentado para mayor visibilidad
+            intensity: 1.5,         // ⭐ Mayor intensidad
+            threshold: 0.01,        // ⭐ Umbral más bajo
+            aggregation: 'SUM',
             colorRange: [
-              [139, 92, 246, 0],      // Transparente
-              [139, 92, 246, 100],    // Púrpura suave
+              [139, 92, 246, 50],     // Púrpura muy suave
+              [139, 92, 246, 120],    // Púrpura suave
               [124, 58, 237, 180],    // Púrpura medio
               [109, 40, 217, 220],    // Púrpura oscuro
               [88, 28, 135, 255]      // Púrpura intenso
