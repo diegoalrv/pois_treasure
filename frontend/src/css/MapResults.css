@@ -247,6 +247,49 @@
   font-size: 0.9rem;
 }
 
+/* ⭐ Participación por perfil */
+.profile-participation-item {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #2a2a2a;
+  border-radius: 6px;
+  border: 1px solid #333;
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.profile-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #FEC31F;
+  text-transform: capitalize;
+}
+
+.profile-rate {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.profile-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 /* Mapa */
 .results-map {
   flex: 1;
