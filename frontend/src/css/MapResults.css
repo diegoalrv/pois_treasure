@@ -467,172 +467,216 @@
   background: #FEC31F;
 }
 
-/* Responsive */
 /* ...existing code... */
 
 /* Media queries para móvil */
 @media (max-width: 768px) {
   .map-results-container {
     flex-direction: column;
+    height: 100vh;
   }
 
+  /* MAPA ARRIBA */
+  .results-map {
+    width: 100%;
+    height: 60vh; /* Mapa ocupa 60% de la pantalla */
+    order: 1; /* Mapa va primero */
+  }
+
+  /* PANEL ABAJO */
   .results-panel {
     position: relative;
     width: 100%;
-    height: auto;
-    max-height: 50vh;
+    height: 40vh; /* Panel ocupa 40% de la pantalla */
+    max-height: none;
     overflow-y: auto;
     z-index: 1000;
+    order: 2; /* Panel va segundo */
+    padding: 16px;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
   }
 
   .results-panel.collapsed {
-    max-height: 60px;
+    height: 80px;
+    overflow: hidden;
   }
 
+  /* Botón de toggle mejorado */
   .panel-toggle {
-    display: block;
     position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 40px;
-    height: 40px;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
     background: rgba(0, 0, 0, 0.8);
-    color: white;
-    border: none;
+    color: #FEC31F;
+    border: 2px solid #FEC31F;
     border-radius: 50%;
-    font-size: 16px;
+    font-size: 18px;
+    font-weight: bold;
     cursor: pointer;
     z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .results-map {
-    width: 100%;
-    height: 50vh;
-    min-height: 400px;
+  .panel-toggle:active {
+    background: #FEC31F;
+    color: #000;
   }
 
+  /* Header del panel */
   .panel-header {
-    padding: 10px;
-    padding-right: 60px; /* Espacio para el botón de toggle */
+    padding: 0;
+    padding-right: 60px;
+    margin-bottom: 16px;
   }
 
   .panel-header h1 {
-    font-size: 18px;
+    font-size: 20px;
     margin: 0;
+    line-height: 1.2;
   }
 
-  .panel-logo {
-    height: 30px !important;
-    margin-right: 8px !important;
+  .logo-placeholder {
+    font-size: 1.5rem;
   }
 
+  /* Stats grid optimizado para móvil */
   .stats-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    padding: 0 10px;
+    margin-bottom: 16px;
   }
 
   .stat-card {
-    padding: 8px;
+    padding: 12px 8px;
+    text-align: center;
   }
 
   .stat-value {
-    font-size: 18px;
+    font-size: 20px;
+    line-height: 1;
   }
 
   .stat-label {
     font-size: 11px;
+    margin-top: 4px;
   }
 
+  /* Filtros section */
   .filters-section {
-    padding: 10px;
+    padding: 0;
+    margin-bottom: 16px;
   }
 
   .filters-section h3 {
-    font-size: 16px;
-    margin-bottom: 10px;
+    font-size: 18px;
+    margin-bottom: 12px;
   }
 
   .filter-group {
-    margin-bottom: 15px;
+    margin-bottom: 12px;
   }
 
   .filter-group label {
     font-size: 14px;
+    margin-bottom: 4px;
   }
 
   .filter-group select {
-    width: 100%;
-    padding: 8px;
-    font-size: 14px;
+    padding: 12px;
+    font-size: 16px; /* Evita zoom en iOS */
   }
 
   .checkbox-label {
     font-size: 14px;
+    padding: 12px;
     margin-bottom: 8px;
   }
 
+  /* Color mode selector */
   .color-mode-selector {
-    display: flex;
-    gap: 10px;
+    gap: 6px;
     margin-top: 8px;
   }
 
   .radio-mode-small {
     font-size: 12px;
+    padding: 8px 6px;
   }
 
+  /* Category distribution */
   .category-distribution {
-    padding: 10px;
+    padding: 0;
+    margin-top: 16px;
   }
 
   .category-distribution h3 {
-    font-size: 16px;
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .category-bar {
     margin-bottom: 10px;
+    align-items: center;
   }
 
-  .category-bar,
-  .profile-participation-item {
-    margin-bottom: 8px;
+  .category-name {
+    width: 100px;
+    font-size: 13px;
   }
 
-  .category-name,
-  .profile-name {
-    font-size: 12px;
-  }
-
-  .category-count,
-  .profile-rate {
-    font-size: 12px;
-  }
-
-  .profile-stats {
-    font-size: 11px;
+  .category-count {
+    font-size: 13px;
+    width: 35px;
   }
 
   .bar-container {
-    height: 6px;
+    height: 8px;
+    margin: 0 8px;
   }
 
-  /* Popup adjustments for mobile */
-  .result-popup {
-    max-width: 250px;
+  /* Profile participation */
+  .profile-participation-item {
+    margin-bottom: 12px;
+    padding: 12px;
+  }
+
+  .profile-name {
+    font-size: 14px;
+  }
+
+  .profile-rate {
+    font-size: 14px;
+  }
+
+  .profile-stats {
     font-size: 12px;
+    gap: 12px;
+  }
+
+  /* Popup adjustments */
+  .result-popup {
+    max-width: 280px;
+    font-size: 14px;
   }
 
   .popup-photo {
-    max-height: 120px;
+    height: 140px;
   }
 
   .popup-description {
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.4;
   }
 
   .popup-footer {
-    font-size: 11px;
+    font-size: 12px;
   }
 
+  /* Loading overlay para móvil */
   .loading-overlay {
     position: fixed;
     top: 0;
@@ -647,58 +691,98 @@
   }
 }
 
-/* Para pantallas muy pequeñas */
+/* Para pantallas muy pequeñas (iPhone SE, etc.) */
 @media (max-width: 480px) {
-  .results-panel {
-    max-height: 40vh;
+  .results-map {
+    height: 65vh;
   }
 
-  .results-map {
-    height: 60vh;
+  .results-panel {
+    height: 35vh;
+    padding: 12px;
+  }
+
+  .results-panel.collapsed {
+    height: 70px;
   }
 
   .panel-header h1 {
-    font-size: 16px;
+    font-size: 18px;
   }
 
-  .panel-logo {
-    height: 25px !important;
+  .logo-placeholder {
+    font-size: 1.3rem;
   }
 
   .stats-grid {
-    grid-template-columns: repeat(3, 1fr);
     gap: 6px;
   }
 
+  .stat-card {
+    padding: 10px 6px;
+  }
+
   .stat-value {
-    font-size: 16px;
+    font-size: 18px;
   }
 
   .stat-label {
     font-size: 10px;
   }
 
-  .filters-section {
-    padding: 8px;
+  .filters-section h3,
+  .category-distribution h3 {
+    font-size: 16px;
   }
 
-  .category-distribution {
-    padding: 8px;
+  .filter-group select {
+    padding: 10px;
   }
 
-  .result-popup {
-    max-width: 200px;
-    font-size: 11px;
+  .checkbox-label {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .category-name {
+    width: 90px;
+    font-size: 12px;
+  }
+
+  .category-count {
+    font-size: 12px;
+    width: 30px;
   }
 }
 
-/* Ajustes específicos para orientación landscape en móvil */
+/* Ajustes para landscape en móvil */
 @media (max-width: 768px) and (orientation: landscape) {
+  .results-map {
+    height: 50vh;
+  }
+
   .results-panel {
-    max-height: 60vh;
+    height: 50vh;
+  }
+
+  .results-panel.collapsed {
+    height: 60px;
+  }
+}
+
+/* Para tablets en portrait */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .map-results-container {
+    flex-direction: row; /* Mantiene el diseño desktop */
+  }
+
+  .results-panel {
+    position: absolute;
+    width: 350px;
   }
 
   .results-map {
-    height: 40vh;
+    width: 100%;
+    height: 100%;
   }
 }
