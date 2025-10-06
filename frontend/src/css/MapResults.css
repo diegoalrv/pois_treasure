@@ -659,7 +659,6 @@
     padding: 2px 1px;
   }
 
-  /* Category distribution ultra compacta */
   .category-distribution {
     padding: 0;
   }
@@ -672,12 +671,12 @@
     margin-bottom: 6px;
     align-items: center;
     display: flex;
-    gap: 4px;
-    min-height: 18px;
+    gap: 3px; /* Reducir gap */
+    min-height: 16px; /* Reducir altura mínima */
   }
 
   .category-name {
-    width: 60px;
+    width: 70px; /* Aumentar ancho para nombres */
     font-size: 9px;
     flex-shrink: 0;
     overflow: hidden;
@@ -688,7 +687,7 @@
 
   .category-count {
     font-size: 10px;
-    width: 22px;
+    width: 25px; /* Asegurar ancho fijo */
     text-align: right;
     flex-shrink: 0;
     font-weight: bold;
@@ -696,13 +695,14 @@
   }
 
   .bar-container {
-    height: 6px;
+    height: 4px; /* Reducir altura de barra */
     flex: 1;
-    margin: 0 3px;
+    margin: 0 2px; /* Reducir margen */
     background: #2a2a2a;
-    border-radius: 3px;
+    border-radius: 2px;
     overflow: hidden;
-    min-width: 30px;
+    min-width: 20px; /* Reducir ancho mínimo */
+    max-width: 80px; /* NUEVO: Limitar ancho máximo */
   }
 
     /* Profile participation compacto */
@@ -857,19 +857,26 @@
     font-size: 9px;
   }
 
+  .category-bar {
+    gap: 2px; /* Reducir aún más el gap */
+    min-height: 14px;
+  }
+
   .category-name {
-    width: 55px;
+    width: 65px; /* Más espacio para nombre */
     font-size: 8px;
   }
 
   .category-count {
     font-size: 9px;
-    width: 20px;
+    width: 22px; /* Más espacio para número */
   }
 
   .bar-container {
-    height: 5px;
-    min-width: 25px;
+    height: 3px; /* Barra aún más pequeña */
+    min-width: 15px;
+    max-width: 60px; /* Ancho máximo más pequeño */
+    margin: 0 1px;
   }
 
   .profile-participation-item {
