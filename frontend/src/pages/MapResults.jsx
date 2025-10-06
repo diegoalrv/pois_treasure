@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef, memo } from "react";
 import mapboxgl from "mapbox-gl";
 import { MapboxOverlay } from "@deck.gl/mapbox";
-import { GeoJsonLayer, HeatmapLayer } from "@deck.gl/layers";
+import { GeoJsonLayer } from "@deck.gl/layers";
+import { HeatmapLayer } from "@deck.gl/aggregation-layers";  // ⭐ Paquete correcto
 import * as turf from "@turf/turf";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "../css/MapResults.css";
