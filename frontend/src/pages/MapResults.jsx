@@ -14,12 +14,53 @@ const github_raw_base =
 
 // Colores por categoría
 const CATEGORY_COLORS = {
-  infrastructure: [254, 195, 31, 200],      // Amarillo
-  user_experience: [59, 130, 246, 200],     // Azul
-  vehicles: [239, 68, 68, 200],             // Rojo
-  regulation: [168, 85, 247, 200],          // Púrpura
-  equity: [34, 197, 94, 200],               // Verde
-  other: [156, 163, 175, 200],              // Gris
+  infrastructure: [254, 195, 31, 200],
+  user_experience: [59, 130, 246, 200],
+  vehicles: [239, 68, 68, 200],
+  regulation: [168, 85, 247, 200],
+  equity: [34, 197, 94, 200],
+  other: [156, 163, 175, 200],
+};
+
+// Colores por perfil de usuario
+const PROFILE_COLORS = {
+  student: [59, 130, 246, 180],
+  elderly: [168, 85, 247, 180],
+  worker: [34, 197, 94, 180],
+  tourist: [251, 146, 60, 180],
+  default: [156, 163, 175, 180],
+};
+
+// Función para interpolar color basado en timestamp
+const getColorByTime = (timestamp, minTime, maxTime) => {
+  const normalized = (timestamp - minTime) / (maxTime - minTime || 1);
+  
+  // Gradient de azul (mañana) → amarillo (mediodía) → rojo (tarde/noche)
+  if (normalized < 0.33) {
+    const t = normalized / 0.33;
+    return [
+      59 + (34 - 59) * t,
+      130 + (211 - 130) * t,
+      246 + (211 - 246) * t,
+      180
+    ];
+  } else if (normalized < 0.66) {
+    const t = (normalized - 0.33) / 0.33;
+    return [
+      34 + (254 - 34) * t,
+      211 + (195 - 211) * t,
+      211 + (31 - 211) * t,
+      180
+    ];
+  } else {
+    const t = (normalized - 0.66) / 0.34;
+    return [
+      254 + (239 - 254) * t,
+      195 + (68 - 195) * t,
+      31 + (68 - 31) * t,
+      180
+    ];
+  }
 };
 
 export default function MapResults() {
@@ -28,7 +69,6 @@ export default function MapResults() {
   const overlayRef = useRef(null);
   const mapInitialized = useRef(false);
 
-  // Estados para datos
   const [surveysData, setSurveysData] = useState(null);
   const [trackingData, setTrackingData] = useState(null);
   const [stats, setStats] = useState(null);
@@ -36,44 +76,35 @@ export default function MapResults() {
   const [loading, setLoading] = useState(true);
   const [panelCollapsed, setPanelCollapsed] = useState(false);
   
-  // Filtros
   const [filters, setFilters] = useState({
     category: 'all',
     showSurveys: true,
     showTracking: false,
-    trackingColorMode: 'profile', // 'profile' o 'time'
+    trackingColorMode: 'profile',
   });
 
-  // ⭐ Cargar TODOS los datos UNA SOLA VEZ al montar el componente
   useEffect(() => {
     const loadAllData = async () => {
       setLoading(true);
       
       try {
-        // Cargar estadísticas
         const statsRes = await fetch(`${API_URL}/results/stats`);
         const statsData = await statsRes.json();
         setStats(statsData);
         
-        // Cargar encuestas
         const surveysRes = await fetch(`${API_URL}/results/surveys/geojson`);
         const surveysData = await surveysRes.json();
-        // Si ya es un objeto, usarlo directamente; si es string, parsearlo
         const surveysParsed = typeof surveysData === 'string' 
           ? JSON.parse(surveysData) 
           : surveysData;
         setSurveysData(surveysParsed);
-        console.log('📊 Encuestas cargadas:', surveysParsed);
         
-        // Cargar tracking
         const trackingRes = await fetch(`${API_URL}/results/tracking/geojson`);
         const trackingData = await trackingRes.json();
-        // Si ya es un objeto, usarlo directamente; si es string, parsearlo
         const trackingParsed = typeof trackingData === 'string'
           ? JSON.parse(trackingData)
           : trackingData;
         setTrackingData(trackingParsed);
-        console.log('📍 Tracking cargado:', trackingParsed);
         
       } catch (e) {
         console.error('Error cargando datos:', e);
@@ -83,9 +114,8 @@ export default function MapResults() {
     };
     
     loadAllData();
-  }, []); // ⭐ Solo se ejecuta UNA VEZ al montar
+  }, []);
 
-  // Inicializar mapa
   useEffect(() => {
     if (mapInitialized.current || !mapContainer.current) return;
 
@@ -100,7 +130,6 @@ export default function MapResults() {
     mapRef.current = map;
     mapInitialized.current = true;
 
-    // Ajustar vista al área
     fetch(`${github_raw_base}/urban_explore/pois_manager/static/geometries/area_mobility_workshop.geojson`)
       .then(r => r.json())
       .then(area => {
@@ -117,7 +146,17 @@ export default function MapResults() {
     };
   }, []);
 
-  // ⭐ Filtrar datos en memoria según la categoría seleccionada
+  const timeRange = trackingData ? (() => {
+    const timestamps = trackingData.features.map(f => 
+      new Date(f.properties.timestamp).getTime()
+    ).filter(t => !isNaN(t));
+    
+    return timestamps.length > 0 ? {
+      min: Math.min(...timestamps),
+      max: Math.max(...timestamps)
+    } : null;
+  })() : null;
+
   const filteredSurveysData = surveysData && filters.category !== 'all'
     ? {
         type: 'FeatureCollection',
@@ -127,12 +166,10 @@ export default function MapResults() {
       }
     : surveysData;
 
-  // Actualizar capas
   useEffect(() => {
     if (!mapRef.current) return;
 
     const layers = [
-      // Área base
       new GeoJsonLayer({
         id: 'area-fill',
         data: `${github_raw_base}/urban_explore/pois_manager/static/geometries/area_mobility_workshop.geojson`,
@@ -144,7 +181,6 @@ export default function MapResults() {
       }),
     ];
 
-    // Capa de encuestas
     if (filters.showSurveys && filteredSurveysData) {
       layers.push(
         new GeoJsonLayer({
@@ -170,28 +206,25 @@ export default function MapResults() {
       );
     }
 
-    // Capa de tracking
     if (filters.showTracking && trackingData) {
       layers.push(
         new GeoJsonLayer({
           id: 'tracking',
           data: trackingData,
-          pointRadiusMinPixels: 3,
-          pointRadiusMaxPixels: 5,
-          getFillColor: [139, 92, 246, 150],
-          getLineColor: [139, 92, 246, 255],
-          lineWidthMinPixels: 1,
-          pickable: true,
-          onClick: info => {
-            if (!info.object) return setPopupInfo(null);
-            const coords = info.object.geometry.coordinates;
-            const props = info.object.properties || {};
-            setPopupInfo({
-              type: 'tracking',
-              coords,
-              data: props,
-            });
+          pointRadiusMinPixels: 4,
+          pointRadiusMaxPixels: 6,
+          getFillColor: d => {
+            if (filters.trackingColorMode === 'time' && timeRange) {
+              const timestamp = new Date(d.properties.timestamp).getTime();
+              return getColorByTime(timestamp, timeRange.min, timeRange.max);
+            } else {
+              const profile = d.properties.profile_name?.toLowerCase() || 'default';
+              return PROFILE_COLORS[profile] || PROFILE_COLORS.default;
+            }
           },
+          getLineColor: [0, 0, 0, 255],
+          lineWidthMinPixels: 1,
+          pickable: false,
         })
       );
     }
@@ -210,46 +243,26 @@ export default function MapResults() {
         overlayRef.current.finalize();
       }
     };
-  }, [filteredSurveysData, trackingData, filters.showSurveys, filters.showTracking]); // ⭐ Actualizar cuando cambian los filtros de visualización
+  }, [filteredSurveysData, trackingData, filters.showSurveys, filters.showTracking, filters.trackingColorMode, timeRange]);
 
-  // Popup
   useEffect(() => {
-    if (!mapRef.current || !popupInfo) return;
+    if (!mapRef.current || !popupInfo || popupInfo.type !== 'survey') return;
 
-    let html = '';
+    const { category, description, photo_url, created_at } = popupInfo.data;
+    const date = new Date(created_at).toLocaleDateString('es-CL');
     
-    if (popupInfo.type === 'survey') {
-      const { category, description, photo_url, created_at } = popupInfo.data;
-      const date = new Date(created_at).toLocaleDateString('es-CL');
-      
-      html = `
-        <div class="result-popup">
-          <div class="popup-category" style="background: rgba(${CATEGORY_COLORS[category]?.slice(0, 3).join(',')}, 0.2)">
-            ${category.replace('_', ' ').toUpperCase()}
-          </div>
-          ${photo_url ? `<img src="${photo_url}" class="popup-photo" />` : ''}
-          <p class="popup-description">${description || 'Sin descripción'}</p>
-          <div class="popup-footer">
-            <span>📅 ${date}</span>
-          </div>
+    const html = `
+      <div class="result-popup">
+        <div class="popup-category" style="background: rgba(${CATEGORY_COLORS[category]?.slice(0, 3).join(',')}, 0.2)">
+          ${category.replace('_', ' ').toUpperCase()}
         </div>
-      `;
-    } else if (popupInfo.type === 'tracking') {
-      const { timestamp, user_id } = popupInfo.data;
-      const date = new Date(timestamp).toLocaleString('es-CL');
-      
-      html = `
-        <div class="result-popup">
-          <div class="popup-category" style="background: rgba(139, 92, 246, 0.2)">
-            TRACKING POINT
-          </div>
-          <p class="popup-description">Usuario: ${user_id}</p>
-          <div class="popup-footer">
-            <span>📅 ${date}</span>
-          </div>
+        ${photo_url ? `<img src="${photo_url}" class="popup-photo" />` : ''}
+        <p class="popup-description">${description || 'Sin descripción'}</p>
+        <div class="popup-footer">
+          <span>📅 ${date}</span>
         </div>
-      `;
-    }
+      </div>
+    `;
 
     const popup = new mapboxgl.Popup({ closeButton: true })
       .setLngLat(popupInfo.coords)
@@ -261,7 +274,6 @@ export default function MapResults() {
 
   return (
     <div className="map-results-container">
-      {/* Loading overlay */}
       {loading && (
         <div className="loading-overlay">
           <div className="loading-spinner"></div>
@@ -269,11 +281,22 @@ export default function MapResults() {
         </div>
       )}
 
-      {/* Panel de control */}
-      <div className="results-panel">
-        <h1>📊 Resultados del Proyecto</h1>
+      <div className={`results-panel ${panelCollapsed ? 'collapsed' : ''}`}>
+        <button 
+          className="panel-toggle"
+          onClick={() => setPanelCollapsed(!panelCollapsed)}
+          title={panelCollapsed ? 'Expandir panel' : 'Contraer panel'}
+        >
+          {panelCollapsed ? '▶' : '◀'}
+        </button>
+
+        {!panelCollapsed && (
+          <>
+            <div className="panel-header">
+              <div className="logo-placeholder">🗺️</div>
+              <h1>Resultados Workshop Movilidad</h1>
+            </div>
         
-        {/* Estadísticas */}
         {stats && (
           <div className="stats-grid">
             <div className="stat-card">
@@ -291,11 +314,9 @@ export default function MapResults() {
           </div>
         )}
 
-        {/* Filtros */}
         <div className="filters-section">
           <h3>Filtros</h3>
           
-          {/* Categorías */}
           <div className="filter-group">
             <label>Categoría</label>
             <select 
@@ -312,7 +333,6 @@ export default function MapResults() {
             </select>
           </div>
 
-          {/* Capas */}
           <div className="filter-group">
             <label className="checkbox-label">
               <input
@@ -331,10 +351,34 @@ export default function MapResults() {
               />
               Mostrar Tracking GPS
             </label>
+            
+            {filters.showTracking && (
+              <div className="color-mode-selector">
+                <label className="radio-mode-small">
+                  <input
+                    type="radio"
+                    name="trackingColorMode"
+                    value="profile"
+                    checked={filters.trackingColorMode === 'profile'}
+                    onChange={e => setFilters({...filters, trackingColorMode: e.target.value})}
+                  />
+                  <span>Por perfil</span>
+                </label>
+                <label className="radio-mode-small">
+                  <input
+                    type="radio"
+                    name="trackingColorMode"
+                    value="time"
+                    checked={filters.trackingColorMode === 'time'}
+                    onChange={e => setFilters({...filters, trackingColorMode: e.target.value})}
+                  />
+                  <span>Por tiempo</span>
+                </label>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Distribución por categoría */}
         {stats?.surveys_by_category && (
           <div className="category-distribution">
             <h3>Distribución por Categoría</h3>
@@ -356,7 +400,6 @@ export default function MapResults() {
           </div>
         )}
 
-        {/* ⭐ Participación por perfil */}
         {stats?.profile_participation && stats.profile_participation.length > 0 && (
           <div className="category-distribution">
             <h3>Participación por Perfil</h3>
@@ -388,7 +431,6 @@ export default function MapResults() {
           </div>
         )}
 
-        {/* ⭐ Encuestas por perfil */}
         {stats?.surveys_by_profile && stats.surveys_by_profile.length > 0 && (
           <div className="category-distribution">
             <h3>Encuestas por Perfil</h3>
@@ -409,9 +451,10 @@ export default function MapResults() {
             ))}
           </div>
         )}
+          </>
+        )}
       </div>
 
-      {/* Mapa */}
       <div ref={mapContainer} className="results-map" />
     </div>
   );
