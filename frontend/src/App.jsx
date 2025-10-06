@@ -6,7 +6,7 @@ import MapResults from "./pages/MapResults";
 
 export default function App() {
   const routes = useRoutes([
-    { path: "/", element: <Home /> },
+    // { path: "/", element: <Home /> },
     { path: "/join/:profile", element: <JoinPage /> },
     { path: "/map/:userId", element: <MapPage /> },
     { path: "/results", element: <MapResults /> }, // ⭐ Nueva ruta

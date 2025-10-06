@@ -467,21 +467,379 @@
   background: #FEC31F;
 }
 
-/* Responsive */
+
+/* ...existing code... */
+
+/* Media queries para móvil */
 @media (max-width: 768px) {
-  .results-panel {
+  .map-results-container {
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* MAPA ARRIBA - 50% */
+  .results-map {
     width: 100%;
+<<<<<<< HEAD
     max-height: 40vh;
     bottom: 0;
     top: auto;
     padding: 16px;
+=======
+    height: 50vh; /* Exactamente la mitad */
+    order: 1;
+>>>>>>> origin/frontend
   }
-  
+
+  /* PANEL ABAJO - 50% */
+  .results-panel {
+    position: relative;
+    width: 100%;
+    height: 50vh; /* Exactamente la mitad */
+    max-height: none;
+    overflow-y: auto;
+    z-index: 1000;
+    order: 2;
+    padding: 10px; /* Padding ultra reducido */
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+  }
+
   .results-panel.collapsed {
-    max-height: 50px;
+    height: 40px;
+    overflow: hidden;
   }
-  
+
+  /* Botón de toggle más pequeño */
+  .panel-toggle {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #FEC31F;
+    border: 1px solid #FEC31F;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Header ultra compacto */
+  .panel-header {
+    padding: 0;
+    padding-right: 30px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #FEC31F;
+    padding-bottom: 3px;
+  }
+
+  .panel-header h1 {
+    font-size: 12px;
+    margin: 0;
+    line-height: 1;
+  }
+
+  .logo-placeholder {
+    font-size: 0.8rem;
+  }
+
+  /* Stats grid ultra compacto */
   .stats-grid {
     grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-bottom: 4px;
+  }
+
+  .stat-card {
+    padding: 3px 2px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 8px;
+    margin-top: 1px;
+  }
+
+  /* Filtros ultra compactos */
+  .filters-section {
+    padding: 0;
+    margin-bottom: 4px;
+  }
+
+  .filters-section h3 {
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+
+  .filter-group {
+    margin-bottom: 4px;
+  }
+
+  .filter-group label {
+    font-size: 10px;
+    margin-bottom: 1px;
+  }
+
+  .filter-group select {
+    padding: 3px;
+    font-size: 12px;
+  }
+
+  .checkbox-label {
+    font-size: 10px;
+    padding: 3px;
+    margin-bottom: 2px;
+  }
+
+  /* Color mode selector ultra compacto */
+  .color-mode-selector {
+    gap: 2px;
+    margin-top: 2px;
+    padding: 2px;
+  }
+
+  .radio-mode-small {
+    font-size: 8px;
+    padding: 2px 1px;
+  }
+
+  /* Category distribution ultra compacta */
+  .category-distribution {
+    padding: 0;
+    margin-top: 4px;
+  }
+
+  .category-distribution h3 {
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+
+  .category-bar {
+    margin-bottom: 3px;
+    align-items: center;
+    display: flex;
+    gap: 4px; /* Asegurar espacio entre elementos */
+  }
+
+  .category-name {
+    width: 70px; /* Aumentar ancho para categorías */
+    font-size: 9px;
+    flex-shrink: 0; /* Evitar que se comprima */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .category-count {
+    font-size: 9px;
+    width: 30px; /* Aumentar ancho para el número */
+    text-align: right;
+    flex-shrink: 0; /* Evitar que se comprima */
+  }
+
+  .bar-container {
+    height: 4px;
+    margin: 0 2px;
+    flex: 1; /* Tomar el espacio restante */
+  }
+
+  /* Profile participation ultra compacto */
+  .profile-participation-item {
+    margin-bottom: 3px;
+    padding: 3px;
+  }
+
+  .profile-name {
+    font-size: 9px;
+  }
+
+  .profile-rate {
+    font-size: 9px;
+  }
+
+  .profile-stats {
+    font-size: 7px;
+    gap: 4px;
+  }
+
+  /* Ajustes generales para elementos h3 */
+  .results-panel h3 {
+    margin: 4px 0 2px 0;
+    font-size: 12px;
+    padding-bottom: 2px;
+  }
+
+  /* Popup adjustments */
+  .result-popup {
+    max-width: 220px;
+    font-size: 11px;
+  }
+
+  .popup-photo {
+    height: 100px;
+  }
+
+  .popup-description {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .popup-footer {
+    font-size: 9px;
+  }
+
+  /* Scrollbar más delgada en móvil */
+  .results-panel::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  /* Reducir espaciado en layer-section-title y view-mode-selector */
+  .layer-section-title {
+    font-size: 10px;
+    margin: 2px 0 2px 0;
+  }
+
+  .view-mode-selector {
+    gap: 2px;
+    margin-top: 2px;
+    padding: 2px;
+  }
+
+  .radio-mode {
+    padding: 3px 4px;
+    font-size: 8px;
+  }
+}
+
+/* Para pantallas muy pequeñas - mantener 50/50 pero aún más compacto */
+@media (max-width: 480px) {
+  .results-map {
+    height: 50vh; /* Mantener 50% */
+  }
+
+  .results-panel {
+    height: 50vh; /* Mantener 50% */
+    padding: 3px; /* Aún menos padding */
+  }
+
+  .results-panel.collapsed {
+    height: 35px;
+  }
+
+  .panel-header h1 {
+    font-size: 10px;
+  }
+
+  .logo-placeholder {
+    font-size: 0.7rem;
+  }
+
+  .stats-grid {
+    gap: 1px;
+  }
+
+  .stat-card {
+    padding: 2px 1px;
+  }
+
+  .stat-value {
+    font-size: 12px;
+  }
+
+  .stat-label {
+    font-size: 7px;
+  }
+
+  .filters-section h3,
+  .category-distribution h3,
+  .results-panel h3 {
+    font-size: 10px;
+    margin: 3px 0 1px 0;
+  }
+
+  .filter-group select {
+    padding: 2px;
+    font-size: 10px;
+  }
+
+  .checkbox-label {
+    padding: 2px;
+    font-size: 9px;
+  }
+
+  .category-name {
+    width: 65px; /* Ajustar para pantallas más pequeñas */
+    font-size: 8px;
+  }
+
+  .category-count {
+    font-size: 8px;
+    width: 25px;
+  }
+
+  .bar-container {
+    height: 3px;
+    margin: 0 1px;
+  }
+
+  .profile-participation-item {
+    padding: 2px;
+    margin-bottom: 2px;
+  }
+
+  .profile-name {
+    font-size: 8px;
+  }
+
+  .profile-rate {
+    font-size: 8px;
+  }
+
+  .profile-stats {
+    font-size: 6px;
+    gap: 3px;
+  }
+
+  .radio-mode-small {
+    font-size: 7px;
+    padding: 1px;
+  }
+
+  .layer-section-title {
+    font-size: 9px;
+  }
+
+  .radio-mode {
+    font-size: 7px;
+    padding: 2px 3px;
+  }
+}
+
+/* ...resto del código existente sin cambios... */
+
+/* Para tablets en portrait */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .map-results-container {
+    flex-direction: row;
+  }
+
+  .results-panel {
+    position: absolute;
+    width: 320px;
+  }
+
+  .results-map {
+    width: 100%;
+    height: 100%;
   }
 }
