@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine
-from routes import users, profiles, pois, surveys, tracking
+from routes import users, profiles, pois, surveys, tracking, results
 import os
 
 # Crear tablas
@@ -18,14 +18,12 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "")
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 if ENVIRONMENT == "production":
-    # En producción, lista explícita de orígenes permitidos
     origins = [
-        "https://mobility-concepcion-workshop.up.railway.app",  # Tu frontend
+        "https://mobility-concepcion-workshop.up.railway.app",
     ]
     if FRONTEND_URL:
         origins.append(FRONTEND_URL)
 else:
-    # En desarrollo, permite todo
     origins = ["*"]
 
 app.add_middleware(
@@ -57,3 +55,4 @@ app.include_router(profiles.router)
 app.include_router(pois.router)
 app.include_router(surveys.router)
 app.include_router(tracking.router)
+app.include_router(results.router)  # ⭐ Nueva ruta
