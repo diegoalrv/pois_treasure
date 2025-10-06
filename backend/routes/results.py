@@ -7,6 +7,7 @@ from typing import Optional
 import models
 import geopandas as gpd
 from shapely import wkt
+import json
 
 router = APIRouter(prefix="/results", tags=["Results"])
 
