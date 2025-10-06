@@ -77,7 +77,10 @@ def get_surveys_geojson(
         crs="EPSG:4326"
     )
     
-    return gdf.to_json()
+    # ⭐ Convertir a dict en lugar de string
+    geojson_str = gdf.to_json()
+    geojson_dict = json.loads(geojson_str)
+    return geojson_dict
 
 
 @router.get("/tracking/geojson")
@@ -132,7 +135,10 @@ def get_tracking_geojson(
         crs="EPSG:4326"
     )
     
-    return gdf.to_json()
+    # ⭐ Convertir a dict en lugar de string
+    geojson_str = gdf.to_json()
+    geojson_dict = json.loads(geojson_str)
+    return geojson_dict
 
 
 @router.get("/stats")
