@@ -1,0 +1,163 @@
+.scan-required-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  padding: 20px;
+}
+
+.scan-required-content {
+  max-width: 500px;
+  width: 100%;
+  background: #333;
+  border-radius: 12px;
+  padding: 40px 30px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid #444;
+}
+
+.scan-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.scan-required-content h1 {
+  color: #FEC31F;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.scan-required-content > p {
+  color: #ddd;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.scan-instructions {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 30px;
+  border-left: 4px solid #FEC31F;
+}
+
+.scan-instructions h3 {
+  color: #FEC31F;
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+}
+
+.scan-instructions ol {
+  text-align: left;
+  color: #ccc;
+  font-size: 1rem;
+  line-height: 1.8;
+  padding-left: 20px;
+}
+
+.scan-instructions li {
+  margin-bottom: 8px;
+}
+
+.scan-instructions li::marker {
+  color: #FEC31F;
+  font-weight: bold;
+}
+
+.help-section {
+  background: rgba(254, 195, 31, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid rgba(254, 195, 31, 0.3);
+}
+
+.help-text {
+  color: #FEC31F;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .scan-required-content {
+    margin: 20px;
+    padding: 30px 20px;
+  }
+
+  .scan-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+  }
+
+  .scan-required-content h1 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+  }
+
+  .scan-required-content > p {
+    font-size: 1rem;
+    margin-bottom: 25px;
+  }
+
+  .scan-instructions {
+    padding: 20px;
+    margin-bottom: 25px;
+  }
+
+  .scan-instructions h3 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+
+  .scan-instructions ol {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    padding-left: 16px;
+  }
+
+  .help-section {
+    padding: 15px;
+  }
+
+  .help-text {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .scan-required-container {
+    padding: 10px;
+  }
+
+  .scan-required-content {
+    margin: 10px;
+    padding: 25px 15px;
+  }
+
+  .scan-icon {
+    font-size: 2.5rem;
+  }
+
+  .scan-required-content h1 {
+    font-size: 1.3rem;
+  }
+
+  .scan-instructions {
+    padding: 15px;
+  }
+
+  .scan-instructions h3 {
+    font-size: 1rem;
+  }
+
+  .scan-instructions ol {
+    font-size: 0.85rem;
+    padding-left: 14px;
+  }
+}
