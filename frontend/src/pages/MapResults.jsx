@@ -28,11 +28,12 @@ export default function MapResults() {
   const overlayRef = useRef(null);
   const mapInitialized = useRef(false);
 
-  // Estados
+  // Estados para datos
   const [surveysData, setSurveysData] = useState(null);
   const [trackingData, setTrackingData] = useState(null);
   const [stats, setStats] = useState(null);
   const [popupInfo, setPopupInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
   
   // Filtros
   const [filters, setFilters] = useState({
@@ -75,18 +76,16 @@ export default function MapResults() {
     if (!filters.showTracking) return;
     
     fetch(`${API_URL}/results/tracking/geojson`)
-      .then(r => r.text())  // ⭐ Cambiar a text() primero
-      .then(text => {
-        try {
-          const data = JSON.parse(text);
-          setTrackingData(data);
-          console.log('📍 Tracking cargado:', data);
-        } catch (e) {
-          console.error('Error parseando tracking:', e);
-          setTrackingData(null);
-        }
+      .then(r => r.json())  // ⭐ Primero obtener como JSON
+      .then(data => {
+        const parsed = JSON.parse(data);  // ⭐ Luego parsear el string
+        setTrackingData(parsed);
+        console.log('📍 Tracking cargado:', parsed);
       })
-      .catch(e => console.error('Error cargando tracking:', e));
+      .catch(e => {
+        console.error('Error cargando tracking:', e);
+        setTrackingData(null);
+      });
   }, [filters.showTracking]);
 
   // Inicializar mapa
