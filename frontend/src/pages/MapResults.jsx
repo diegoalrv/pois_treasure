@@ -83,6 +83,8 @@ export default function MapResults() {
     trackingColorMode: 'profile',
   });
 
+  const [activeTab, setActiveTab] = useState('filters');
+
   useEffect(() => {
     const loadAllData = async () => {
       setLoading(true);
@@ -293,14 +295,8 @@ export default function MapResults() {
         {!panelCollapsed && (
           <>
             <div className="panel-header">
-              {/* Add your logo here */}
-              <img 
-                src="https://d26q11cgz8q0ri.cloudfront.net/2023/08/21115443/logo-CLBB.png" 
-                alt="Logo"
-                className="panel-logo"
-                style={{ height: 40, marginRight: 12 }}
-              />
-              <h1>Resultados Workshop Movilidad</h1>
+              <div className="logo-placeholder">📊</div>
+              <h1>Workshop Movilidad</h1>
             </div>
         
         {stats && (
@@ -320,143 +316,169 @@ export default function MapResults() {
           </div>
         )}
 
-        <div className="filters-section">
-          <h3>Filtros</h3>
-          
-          <div className="filter-group">
-            <label>Categoría</label>
-            <select 
-              value={filters.category}
-              onChange={e => setFilters({...filters, category: e.target.value})}
-            >
-              <option value="all">Todas</option>
-              <option value="infrastructure">Infraestructura</option>
-              <option value="user_experience">Experiencia de Usuario</option>
-              <option value="vehicles">Vehículos</option>
-              <option value="regulation">Regulación</option>
-              <option value="equity">Equidad</option>
-              <option value="other">Otro</option>
-            </select>
-          </div>
+        {/* Tabs para móvil */}
+        <div className="mobile-tabs">
+          <button 
+            className={`tab-button ${activeTab === 'filters' ? 'active' : ''}`}
+            onClick={() => setActiveTab('filters')}
+          >
+            Filtros
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'categories' ? 'active' : ''}`}
+            onClick={() => setActiveTab('categories')}
+          >
+            Categorías
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'profiles' ? 'active' : ''}`}
+            onClick={() => setActiveTab('profiles')}
+          >
+            Perfiles
+          </button>
+        </div>
 
-          <div className="filter-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={filters.showSurveys}
-                onChange={e => setFilters({...filters, showSurveys: e.target.checked})}
-              />
-              Mostrar Encuestas
-            </label>
-            
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={filters.showTracking}
-                onChange={e => setFilters({...filters, showTracking: e.target.checked})}
-              />
-              Mostrar Tracking GPS
-            </label>
-            
-            {filters.showTracking && (
-              <div className="color-mode-selector">
-                <label className="radio-mode-small">
-                  <input
-                    type="radio"
-                    name="trackingColorMode"
-                    value="profile"
-                    checked={filters.trackingColorMode === 'profile'}
-                    onChange={e => setFilters({...filters, trackingColorMode: e.target.value})}
-                  />
-                  <span>Por perfil</span>
-                </label>
-                <label className="radio-mode-small">
-                  <input
-                    type="radio"
-                    name="trackingColorMode"
-                    value="time"
-                    checked={filters.trackingColorMode === 'time'}
-                    onChange={e => setFilters({...filters, trackingColorMode: e.target.value})}
-                  />
-                  <span>Por tiempo</span>
-                </label>
-              </div>
-            )}
+        {/* Contenido de Filtros */}
+        <div className={`tab-content ${activeTab === 'filters' ? 'active' : ''}`}>
+          <div className="filters-section">
+            <div className="filter-group">
+              <label>Categoría</label>
+              <select 
+                value={filters.category}
+                onChange={e => setFilters({...filters, category: e.target.value})}
+              >
+                <option value="all">Todas</option>
+                <option value="infrastructure">Infraestructura</option>
+                <option value="user_experience">Experiencia de Usuario</option>
+                <option value="vehicles">Vehículos</option>
+                <option value="regulation">Regulación</option>
+                <option value="equity">Equidad</option>
+                <option value="other">Otro</option>
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={filters.showSurveys}
+                  onChange={e => setFilters({...filters, showSurveys: e.target.checked})}
+                />
+                Mostrar Encuestas
+              </label>
+              
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={filters.showTracking}
+                  onChange={e => setFilters({...filters, showTracking: e.target.checked})}
+                />
+                Mostrar Tracking GPS
+              </label>
+              
+              {filters.showTracking && (
+                <div className="color-mode-selector">
+                  <label className="radio-mode-small">
+                    <input
+                      type="radio"
+                      name="trackingColorMode"
+                      value="profile"
+                      checked={filters.trackingColorMode === 'profile'}
+                      onChange={e => setFilters({...filters, trackingColorMode: e.target.value})}
+                    />
+                    <span>Por perfil</span>
+                  </label>
+                  <label className="radio-mode-small">
+                    <input
+                      type="radio"
+                      name="trackingColorMode"
+                      value="time"
+                      checked={filters.trackingColorMode === 'time'}
+                      onChange={e => setFilters({...filters, trackingColorMode: e.target.value})}
+                    />
+                    <span>Por tiempo</span>
+                  </label>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {stats?.surveys_by_category && (
-          <div className="category-distribution">
-            <h3>Distribución por Categoría</h3>
-            {stats.surveys_by_category.map(item => (
-              <div key={item.category} className="category-bar">
-                <span className="category-name">{item.category}</span>
-                <div className="bar-container">
-                  <div 
-                    className="bar-fill" 
-                    style={{
-                      width: `${(item.count / stats.total_surveys) * 100}%`,
-                      background: `rgb(${CATEGORY_COLORS[item.category]?.slice(0, 3).join(',')})`
-                    }}
-                  />
+        {/* Contenido de Categorías */}
+        <div className={`tab-content ${activeTab === 'categories' ? 'active' : ''}`}>
+          {stats?.surveys_by_category && (
+            <div className="category-distribution">
+              {stats.surveys_by_category.map(item => (
+                <div key={item.category} className="category-bar">
+                  <span className="category-name">{item.category}</span>
+                  <div className="bar-container">
+                    <div 
+                      className="bar-fill" 
+                      style={{
+                        width: `${(item.count / stats.total_surveys) * 100}%`,
+                        background: `rgb(${CATEGORY_COLORS[item.category]?.slice(0, 3).join(',')})`
+                      }}
+                    />
+                  </div>
+                  <span className="category-count">{item.count}</span>
                 </div>
-                <span className="category-count">{item.count}</span>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
 
-        {stats?.profile_participation && stats.profile_participation.length > 0 && (
-          <div className="category-distribution">
-            <h3>Participación por Perfil</h3>
-            {stats.profile_participation.map(item => (
-              <div key={item.profile} className="profile-participation-item">
-                <div className="profile-header">
-                  <span className="profile-name">{item.profile}</span>
-                  <span className="profile-rate">{item.participation_rate}%</span>
+        {/* Contenido de Perfiles */}
+        <div className={`tab-content ${activeTab === 'profiles' ? 'active' : ''}`}>
+          {stats?.profile_participation && stats.profile_participation.length > 0 && (
+            <div className="category-distribution">
+              {stats.profile_participation.map(item => (
+                <div key={item.profile} className="profile-participation-item">
+                  <div className="profile-header">
+                    <span className="profile-name">{item.profile}</span>
+                    <span className="profile-rate">{item.participation_rate}%</span>
+                  </div>
+                  <div className="profile-stats">
+                    <span className="profile-stat">
+                      👥 {item.total_users}
+                    </span>
+                    <span className="profile-stat">
+                      ✅ {item.users_with_surveys}
+                    </span>
+                  </div>
+                  <div className="bar-container">
+                    <div 
+                      className="bar-fill" 
+                      style={{
+                        width: `${item.participation_rate}%`,
+                        background: '#3b82f6'
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="profile-stats">
-                  <span className="profile-stat">
-                    👥 {item.total_users} usuarios
-                  </span>
-                  <span className="profile-stat">
-                    ✅ {item.users_with_surveys} activos
-                  </span>
-                </div>
-                <div className="bar-container">
-                  <div 
-                    className="bar-fill" 
-                    style={{
-                      width: `${item.participation_rate}%`,
-                      background: '#3b82f6'
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
 
-        {stats?.surveys_by_profile && stats.surveys_by_profile.length > 0 && (
-          <div className="category-distribution">
-            <h3>Encuestas por Perfil</h3>
-            {stats.surveys_by_profile.map(item => (
-              <div key={item.profile} className="category-bar">
-                <span className="category-name">{item.profile}</span>
-                <div className="bar-container">
-                  <div 
-                    className="bar-fill" 
-                    style={{
-                      width: `${(item.count / stats.total_surveys) * 100}%`,
-                      background: '#10b981'
-                    }}
-                  />
+          {stats?.surveys_by_profile && stats.surveys_by_profile.length > 0 && (
+            <div className="category-distribution" style={{marginTop: '12px'}}>
+              {stats.surveys_by_profile.map(item => (
+                <div key={item.profile} className="category-bar">
+                  <span className="category-name">{item.profile}</span>
+                  <div className="bar-container">
+                    <div 
+                      className="bar-fill" 
+                      style={{
+                        width: `${(item.count / stats.total_surveys) * 100}%`,
+                        background: '#10b981'
+                      }}
+                    />
+                  </div>
+                  <span className="category-count">{item.count}</span>
                 </div>
-                <span className="category-count">{item.count}</span>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
           </>
         )}
       </div>
