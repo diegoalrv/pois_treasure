@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import MapView from "../components/MapView";
 import SurveyModal from "../components/SurveyModal";
+import TrackingStatus from "../components/TrackingStatus";
 import useGeolocation from "../hooks/useGeolocation";
 import trackingService from "../services/trackingService";
 import "../css/style.css";
@@ -11,10 +12,12 @@ export default function MapPage() {
   const [geojson, setGeojson] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [isTracking, setIsTracking] = useState(false);
   
-  // 📍 Hook de geolocalización
-  const { location, error: geoError, loading: geoLoading } = useGeolocation();
+  // 📍 Hook de geolocalización mejorado
+  const { location, error: geoError, loading: geoLoading, permissionStatus } = useGeolocation();
 
+  // Cargar datos del mapa
   useEffect(() => {
     async function loadData() {
       try {
@@ -32,62 +35,94 @@ export default function MapPage() {
     loadData();
   }, [userId]);
 
-  // 📍 Iniciar tracking cuando tengamos ubicación
+  // 📍 Iniciar tracking cuando tengamos ubicación y permisos
   useEffect(() => {
-    if (!location || !userId) return;
+    if (!location || !userId || permissionStatus !== 'granted') {
+      return;
+    }
 
     // Iniciar el servicio de tracking
     trackingService.startTracking(userId);
-
-    // Agregar el primer punto
-    trackingService.addPoint(location.latitude, location.longitude);
+    setIsTracking(true);
 
     return () => {
-      // Detener tracking al desmontar
+      // Detener tracking al desmontar el componente
       trackingService.stopTracking();
+      setIsTracking(false);
     };
-  }, [userId]); // Solo cuando cambie userId
+  }, [userId, location, permissionStatus]);
 
-  // 📍 Agregar punto cada vez que cambie la ubicación
+  // Manejar antes de cerrar la pestaña/navegador
   useEffect(() => {
-    if (location && userId) {
-      trackingService.addPoint(location.latitude, location.longitude);
-    }
-  }, [location, userId]);
+    const handleBeforeUnload = (e) => {
+      // Enviar puntos pendientes antes de cerrar
+      trackingService.flushBuffer();
+    };
 
-  if (loading) return <div>Loading map data...</div>;
-  if (!geojson) return <div>No data found for map {userId}</div>;
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading map data...</p>
+      </div>
+    );
+  }
+
+  if (!geojson) {
+    return (
+      <div className="error-container">
+        <p>No data found for user {userId}</p>
+      </div>
+    );
+  }
 
   return (
     <>
       <MapView data={geojson} initialCenter={[-73.0586, -36.8274]} initialZoom={13} />
       
-      {/* Mostrar estado de geolocalización */}
+      {/* Componente de estado de tracking */}
+      <TrackingStatus location={location} isTracking={isTracking} />
+
+      {/* Mostrar estado de geolocalización si hay problemas */}
       {geoLoading && (
-        <div className="geo-status loading">
-          📍 Obteniendo ubicación...
+        <div className="geo-loading">
+          <div className="spinner-small"></div>
+          📍 Getting location...
         </div>
       )}
+      
       {geoError && (
-        <div className="geo-status error">
-          ⚠️ {geoError}
-        </div>
-      )}
-      {location && (
-        <div className="geo-status success">
-          📍 Tracking activo
+        <div className="geo-error">
+          <span className="error-icon">⚠️</span>
+          <div className="error-content">
+            <strong>Location Error</strong>
+            <p>{geoError}</p>
+            {permissionStatus === 'denied' && (
+              <small>Please enable location permissions in your browser settings</small>
+            )}
+          </div>
         </div>
       )}
 
+      {/* Botón flotante para encuesta */}
       <button
         type="button"
         className="floating-action-button"
         onClick={() => setShowModal(true)}
-        disabled={!location} // Deshabilitar si no hay ubicación
+        disabled={!location}
+        title={!location ? 'Waiting for location...' : 'Open survey'}
       >
         +
       </button>
       
+      {/* Modal de encuesta */}
       {showModal && (
         <SurveyModal 
           onClose={() => setShowModal(false)} 
