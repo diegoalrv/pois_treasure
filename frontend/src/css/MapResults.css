@@ -278,6 +278,7 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
+  min-height: 24px;
 }
 
 .category-name {
@@ -285,6 +286,10 @@
   font-size: 0.85rem;
   color: #ddd;
   text-transform: capitalize;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bar-container {
@@ -293,6 +298,7 @@
   background: #2a2a2a;
   border-radius: 4px;
   overflow: hidden;
+  min-width: 0;
 }
 
 .bar-fill {
@@ -307,6 +313,7 @@
   font-weight: 600;
   color: #FEC31F;
   font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
 /* ⭐ Participación por perfil */
@@ -465,6 +472,15 @@
 
 .results-panel::-webkit-scrollbar-thumb:hover {
   background: #FEC31F;
+}
+
+/* Ocultar tabs en desktop */
+.mobile-tabs {
+  display: none;
+}
+
+.tab-content {
+  display: block;
 }
 
 
@@ -653,56 +669,87 @@
   }
 
   .category-bar {
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     align-items: center;
     display: flex;
-    gap: 6px;
+    gap: 4px;
+    min-height: 18px;
   }
 
   .category-name {
-    width: 80px;
-    font-size: 10px;
+    width: 60px;
+    font-size: 9px;
     flex-shrink: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    line-height: 1.1;
   }
 
   .category-count {
     font-size: 10px;
-    width: 25px;
+    width: 22px;
     text-align: right;
     flex-shrink: 0;
     font-weight: bold;
+    color: #FEC31F;
   }
 
   .bar-container {
     height: 6px;
     flex: 1;
-    margin: 0 4px;
+    margin: 0 3px;
+    background: #2a2a2a;
+    border-radius: 3px;
+    overflow: hidden;
+    min-width: 30px;
   }
 
-  /* Profile participation compacto */
+    /* Profile participation compacto */
   .profile-participation-item {
-    margin-bottom: 4px;
-    padding: 4px;
+    margin-bottom: 6px;
+    padding: 6px;
     background: rgba(255,255,255,0.05);
     border-radius: 3px;
+  }
+
+  .profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
   }
 
   .profile-name {
     font-size: 10px;
     font-weight: bold;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .profile-rate {
     font-size: 10px;
+    color: #FEC31F;
+    font-weight: bold;
+    margin-left: 6px;
+    flex-shrink: 0;
   }
 
   .profile-stats {
     font-size: 8px;
     gap: 6px;
-    margin-top: 2px;
+    margin-top: 3px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .profile-stat {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* Color mode selector horizontal compacto */
@@ -811,18 +858,18 @@
   }
 
   .category-name {
-    width: 65px; /* Ajustar para pantallas más pequeñas */
+    width: 55px;
     font-size: 8px;
   }
 
   .category-count {
-    font-size: 8px;
-    width: 25px;
+    font-size: 9px;
+    width: 20px;
   }
 
   .bar-container {
-    height: 3px;
-    margin: 0 1px;
+    height: 5px;
+    min-width: 25px;
   }
 
   .profile-participation-item {
