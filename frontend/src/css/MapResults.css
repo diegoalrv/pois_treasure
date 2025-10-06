@@ -483,7 +483,7 @@
     max-height: 40vh;
     bottom: 0;
     top: auto;
-    padding: 16px;
+    order: 1;
   }
 
   /* PANEL ABAJO - 50% */
@@ -495,7 +495,7 @@
     overflow-y: auto;
     z-index: 1000;
     order: 2;
-    padding: 10px; /* Padding ultra reducido */
+    padding: 16px; /* Padding ultra reducido */
     box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
   }
 
