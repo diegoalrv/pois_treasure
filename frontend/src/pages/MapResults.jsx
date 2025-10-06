@@ -58,12 +58,16 @@ export default function MapResults() {
     }
     
     fetch(`${API_URL}/results/surveys/geojson?${params}`)
-      .then(r => r.json())
+      .then(r => r.json())  // ⭐ Primero obtener como JSON
       .then(data => {
-        setSurveysData(data);
-        console.log('📊 Encuestas cargadas:', data);
+        const parsed = JSON.parse(data);  // ⭐ Luego parsear el string
+        setSurveysData(parsed);
+        console.log('📊 Encuestas cargadas:', parsed);
       })
-      .catch(e => console.error('Error cargando surveys:', e));
+      .catch(e => {
+        console.error('Error cargando surveys:', e);
+        setSurveysData(null);
+      });
   }, [filters.category]);
 
   // Cargar datos de tracking
@@ -71,10 +75,16 @@ export default function MapResults() {
     if (!filters.showTracking) return;
     
     fetch(`${API_URL}/results/tracking/geojson`)
-      .then(r => r.json())
-      .then(data => {
-        setTrackingData(data);
-        console.log('📍 Tracking cargado:', data);
+      .then(r => r.text())  // ⭐ Cambiar a text() primero
+      .then(text => {
+        try {
+          const data = JSON.parse(text);
+          setTrackingData(data);
+          console.log('📍 Tracking cargado:', data);
+        } catch (e) {
+          console.error('Error parseando tracking:', e);
+          setTrackingData(null);
+        }
       })
       .catch(e => console.error('Error cargando tracking:', e));
   }, [filters.showTracking]);
