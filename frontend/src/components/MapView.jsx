@@ -1,3 +1,4 @@
+// frontend/src/components/MapView.jsx
 import { useEffect, useRef, useState, memo } from "react";
 import mapboxgl from "mapbox-gl";
 import { MapboxOverlay } from "@deck.gl/mapbox";
@@ -10,6 +11,9 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 const github_raw_base =
   "https://raw.githubusercontent.com/diegoalrv/mobility-workshop/refs/heads/master";
+
+// Variable de entorno para distancia de validación
+const VALIDATE_DISTANCE_TO_POI = parseInt(import.meta.env.VITE_VALIDATE_DISTANCE_TO_POI || '50', 10);
 
 // Puntos de inicio y fin
 const START_POINT = {
@@ -39,7 +43,6 @@ function MapView({
   const [popupInfo, setPopupInfo] = useState(null);
   const mapInitialized = useRef(false);
 
-  // Inicializar el mapa solo una vez
   useEffect(() => {
     if (mapInitialized.current || !mapContainer.current) return;
 
@@ -72,12 +75,10 @@ function MapView({
     };
   }, []);
 
-  // Actualizar capas cuando cambian los datos
   useEffect(() => {
     if (!mapRef.current || !data) return;
 
     const layers = [
-      // Área
       new GeoJsonLayer({
         id: "area-fill",
         data: `${github_raw_base}/urban_explore/pois_manager/static/geometries/area_mobility_workshop.geojson`,
@@ -87,13 +88,11 @@ function MapView({
         getLineColor: [254, 195, 31, 200],
         lineWidthMinPixels: 2,
       }),
-      // POIs
       new GeoJsonLayer({
         id: "pois",
         data,
         pointRadiusMinPixels: 6,
         getFillColor: d => {
-          // Verde si visitado, amarillo si no
           return d.properties.visited 
             ? [34, 197, 94, 255] 
             : [254, 195, 31, 200];
@@ -114,7 +113,6 @@ function MapView({
           });
         },
       }),
-      // Marcador de inicio (verde)
       new IconLayer({
         id: 'start-marker',
         data: [START_POINT],
@@ -136,7 +134,6 @@ function MapView({
           ...START_POINT
         }),
       }),
-      // Marcador de fin (rojo)
       new IconLayer({
         id: 'end-marker',
         data: [END_POINT],
@@ -176,14 +173,12 @@ function MapView({
     };
   }, [data]);
 
-  // Popup
   useEffect(() => {
     if (!mapRef.current || !popupInfo) return;
 
     let html = '';
     
     if (popupInfo.type === 'marker') {
-      // Popup para inicio/fin
       html = `
         <div style="font-family:Inter,sans-serif;max-width:280px">
           <h3 style="color:#000;margin:0 0 5px 0;">
@@ -200,7 +195,6 @@ function MapView({
         </div>
       `;
     } else if (popupInfo.type === 'poi') {
-      // Calcular distancia si hay ubicación del usuario
       let distance = null;
       let isNearby = false;
       
@@ -208,7 +202,7 @@ function MapView({
         const from = turf.point([userLocation.longitude, userLocation.latitude]);
         const to = turf.point(popupInfo.coordinates);
         distance = turf.distance(from, to, { units: 'meters' });
-        isNearby = distance <= 50; // Dentro de 50 metros
+        isNearby = distance <= VALIDATE_DISTANCE_TO_POI;
       }
 
       html = `
@@ -218,7 +212,7 @@ function MapView({
               ${popupInfo.category || 'POI'}
             </strong>
           </div>
-          <h3 style="color:#000;margin:0 0 5px 0;">📍 ${popupInfo.name}</h3>
+          <h3 style="color:#000;margin:0 0 5px 0;">${popupInfo.name}</h3>
           ${popupInfo.visited ? '<p style="color:#10b981;font-weight:600;margin:5px 0;">✅ Visitado</p>' : ''}
           ${distance !== null ? `
             <p style="margin:5px 0;color:#666;font-size:0.85rem;">
@@ -231,7 +225,7 @@ function MapView({
                 id="mark-visited-btn"
                 ${!isNearby ? 'disabled' : ''}
                 style="padding:8px 12px;background:${isNearby ? '#10b981' : '#9ca3af'};color:white;border:none;border-radius:4px;font-weight:600;cursor:${isNearby ? 'pointer' : 'not-allowed'};">
-                ${isNearby ? '✓ Marcar como visitado' : '⚠️ Debes estar cerca (50m)'}
+                ${isNearby ? '✓ Marcar como visitado' : `⚠️ Debes estar cerca (${VALIDATE_DISTANCE_TO_POI}m)`}
               </button>
             ` : ''}
             <a href="https://www.google.com/maps/search/?api=1&query=${popupInfo.coordinates[1]},${popupInfo.coordinates[0]}"
@@ -249,7 +243,6 @@ function MapView({
       .setHTML(html)
       .addTo(mapRef.current);
 
-    // Event listener para el botón de marcar visitado
     if (popupInfo.type === 'poi' && onMarkVisited && !popupInfo.visited) {
       setTimeout(() => {
         const btn = document.getElementById('mark-visited-btn');
@@ -265,7 +258,20 @@ function MapView({
     return () => popup.remove();
   }, [popupInfo, userLocation, onMarkVisited]);
 
-  return <div ref={mapContainer} style={{ width: "100%", height: "100vh" }} />;
+  return (
+    <>
+      {/* AppBar */}
+      <div className="app-bar">
+        <img 
+          src="https://d26q11cgz8q0ri.cloudfront.net/2023/08/21115443/logo-CLBB.png" 
+          alt="Logo CLBB" 
+          className="app-bar-logo"
+        />
+        <h1 className="app-bar-title">Workshop Movilidad: Human Agents</h1>
+      </div>
+      <div ref={mapContainer} style={{ width: "100%", height: "100vh" }} />
+    </>
+  );
 }
 
 export default memo(MapView);

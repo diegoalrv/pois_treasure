@@ -1,0 +1,148 @@
+.home-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1c1c1c 0%, #2d2d2d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.home-content {
+  max-width: 800px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.home-logo {
+  height: 80px;
+  width: auto;
+  margin-bottom: 20px;
+}
+
+.home-title {
+  color: #FEC31F;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 30px 0;
+  text-align: center;
+}
+
+.home-description {
+  color: #fff;
+  margin-bottom: 30px;
+}
+
+.home-description p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.home-description h2 {
+  color: #FEC31F;
+  font-size: 1.5rem;
+  margin: 30px 0 15px 0;
+}
+
+.objectives-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.objectives-list li {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+  background: rgba(254, 195, 31, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  border-left: 4px solid #FEC31F;
+}
+
+.objectives-list .icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.objectives-list strong {
+  color: #FEC31F;
+  font-size: 1.1rem;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.objectives-list p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #ddd;
+}
+
+.home-instructions {
+  background: rgba(254, 195, 31, 0.15);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 30px 0;
+  text-align: center;
+}
+
+.home-instructions h3 {
+  color: #FEC31F;
+  margin: 0 0 10px 0;
+  font-size: 1.3rem;
+}
+
+.home-instructions p {
+  color: #fff;
+  margin: 0 0 15px 0;
+}
+
+.qr-placeholder {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 30px;
+  margin-top: 15px;
+}
+
+.qr-placeholder span {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.qr-placeholder p {
+  color: #ddd;
+  margin: 0;
+}
+
+.home-footer {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(254, 195, 31, 0.3);
+}
+
+.home-footer p {
+  color: #999;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .home-title {
+    font-size: 1.8rem;
+  }
+  
+  .home-content {
+    padding: 30px 20px;
+  }
+  
+  .objectives-list .icon {
+    font-size: 1.5rem;
+  }
+}
