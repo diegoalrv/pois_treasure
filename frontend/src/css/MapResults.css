@@ -620,21 +620,30 @@
   .category-bar {
     margin-bottom: 3px;
     align-items: center;
+    display: flex;
+    gap: 4px; /* Asegurar espacio entre elementos */
   }
 
   .category-name {
-    width: 50px;
-    font-size: 8px;
+    width: 70px; /* Aumentar ancho para categorías */
+    font-size: 9px;
+    flex-shrink: 0; /* Evitar que se comprima */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .category-count {
-    font-size: 8px;
-    width: 20px;
+    font-size: 9px;
+    width: 30px; /* Aumentar ancho para el número */
+    text-align: right;
+    flex-shrink: 0; /* Evitar que se comprima */
   }
 
   .bar-container {
     height: 4px;
     margin: 0 2px;
+    flex: 1; /* Tomar el espacio restante */
   }
 
   /* Profile participation ultra compacto */
@@ -762,17 +771,18 @@
   }
 
   .category-name {
-    width: 45px;
-    font-size: 7px;
+    width: 65px; /* Ajustar para pantallas más pequeñas */
+    font-size: 8px;
   }
 
   .category-count {
-    font-size: 7px;
-    width: 18px;
+    font-size: 8px;
+    width: 25px;
   }
 
   .bar-container {
     height: 3px;
+    margin: 0 1px;
   }
 
   .profile-participation-item {
