@@ -34,12 +34,14 @@ export default function MapResults() {
   const [stats, setStats] = useState(null);
   const [popupInfo, setPopupInfo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
   
   // Filtros
   const [filters, setFilters] = useState({
     category: 'all',
     showSurveys: true,
     showTracking: false,
+    trackingColorMode: 'profile', // 'profile' o 'time'
   });
 
   // ⭐ Cargar TODOS los datos UNA SOLA VEZ al montar el componente
