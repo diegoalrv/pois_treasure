@@ -14,25 +14,15 @@ def join_user(data: schemas.UserJoinRequest, db: Session = Depends(get_db)):
     """
     Endpoint llamado desde el frontend cuando el usuario entra vía QR:
     - Recibe: {username: "pepe", profile: "student"}
-    - Si el usuario ya existe, lo devuelve.
+    - Si el usuario ya existe, rechaza la petición (solo pueden ingresar una vez)
     - Si no existe, lo crea y le asigna POIs aleatorios según las reglas de su perfil.
     """
-    # 🔎 Buscar si ya existe el usuario
-    user = db.query(models.User).filter(models.User.username == data.username).first()
-    if user:
-        # Si ya existe devolvemos sus asignaciones
-        assigned = (
-            db.query(models.UserPOIAssignment.poi_id)
-            .filter(models.UserPOIAssignment.user_id == user.id)
-            .all()
-        )
-        assigned_pois = [a.poi_id for a in assigned]
-        return schemas.UserResponse(
-            id=user.id,
-            username=user.username,
-            profile=user.profile.name,
-            uuid=user.uuid,                   # ✅
-            assigned_pois=assigned_pois,
+    # 🚫 Verificar si ya existe el usuario
+    existing_user = db.query(models.User).filter(models.User.username == data.username).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=409, 
+            detail=f"El username '{data.username}' ya existe. Por favor elige otro nombre."
         )
 
     # 🔎 Buscar el perfil por nombre
@@ -40,32 +30,42 @@ def join_user(data: schemas.UserJoinRequest, db: Session = Depends(get_db)):
     if not profile:
         raise HTTPException(status_code=404, detail=f"Perfil '{data.profile}' no encontrado")
 
-    # ➕ Crear usuario
-    user = models.User(username=data.username, profile=profile)
-    db.add(user)
-    db.flush()  # obtiene user.id antes de commitear
+    try:
+        # ➕ Crear usuario
+        user = models.User(username=data.username, profile=profile)
+        db.add(user)
+        db.flush()  # obtiene user.id antes de commitear
 
-    # 🎲 Asignar POIs aleatorios según reglas
-    assigned_pois = []
-    rules = profile.rules or {}
-    for category, count in rules.items():
-        if count > 0:
-            pois = db.query(models.POI).filter(models.POI.category == category).all()
-            if pois:
-                sample = random.sample(pois, min(count, len(pois)))
-                for poi in sample:
-                    db.add(models.UserPOIAssignment(user_id=user.id, poi_id=poi.id))
-                    assigned_pois.append(poi.id)
+        # 🎲 Asignar POIs aleatorios según reglas
+        assigned_pois = []
+        rules = profile.rules or {}
+        for category, count in rules.items():
+            if count > 0:
+                pois = db.query(models.POI).filter(models.POI.category == category).all()
+                if pois:
+                    sample = random.sample(pois, min(count, len(pois)))
+                    for poi in sample:
+                        db.add(models.UserPOIAssignment(user_id=user.id, poi_id=poi.id))
+                        assigned_pois.append(poi.id)
 
-    db.commit()
+        db.commit()
 
-    return schemas.UserResponse(
-        id=user.id,
-        username=user.username,
-        profile=profile.name,
-        uuid=user.uuid,                   # ✅
-        assigned_pois=assigned_pois,
-    )
+        return schemas.UserResponse(
+            id=user.id,
+            username=user.username,
+            profile=profile.name,
+            uuid=user.uuid,
+            assigned_pois=assigned_pois,
+        )
+        
+    except IntegrityError:
+        # Si hay error de integridad por race condition (dos requests simultáneos)
+        db.rollback()
+        raise HTTPException(
+            status_code=409, 
+            detail=f"El username '{data.username}' ya está en uso. Por favor elige otro."
+        )
+
 
 
 @router.get("/{user_id}/assignments", response_model=list[schemas.AssignmentOut])
