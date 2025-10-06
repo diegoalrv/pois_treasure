@@ -43,50 +43,46 @@ export default function MapResults() {
     showHeatmap: false,
   });
 
-  // Cargar estadísticas
+  // ⭐ Cargar TODOS los datos UNA SOLA VEZ al montar el componente
   useEffect(() => {
-    fetch(`${API_URL}/results/stats`)
-      .then(r => r.json())
-      .then(setStats)
-      .catch(e => console.error('Error cargando stats:', e));
-  }, []);
-
-  // Cargar datos de encuestas
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (filters.category !== 'all') {
-      params.append('category', filters.category);
-    }
+    const loadAllData = async () => {
+      setLoading(true);
+      
+      try {
+        // Cargar estadísticas
+        const statsRes = await fetch(`${API_URL}/results/stats`);
+        const statsData = await statsRes.json();
+        setStats(statsData);
+        
+        // Cargar encuestas
+        const surveysRes = await fetch(`${API_URL}/results/surveys/geojson`);
+        const surveysData = await surveysRes.json();
+        // Si ya es un objeto, usarlo directamente; si es string, parsearlo
+        const surveysParsed = typeof surveysData === 'string' 
+          ? JSON.parse(surveysData) 
+          : surveysData;
+        setSurveysData(surveysParsed);
+        console.log('📊 Encuestas cargadas:', surveysParsed);
+        
+        // Cargar tracking
+        const trackingRes = await fetch(`${API_URL}/results/tracking/geojson`);
+        const trackingData = await trackingRes.json();
+        // Si ya es un objeto, usarlo directamente; si es string, parsearlo
+        const trackingParsed = typeof trackingData === 'string'
+          ? JSON.parse(trackingData)
+          : trackingData;
+        setTrackingData(trackingParsed);
+        console.log('📍 Tracking cargado:', trackingParsed);
+        
+      } catch (e) {
+        console.error('Error cargando datos:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    fetch(`${API_URL}/results/surveys/geojson?${params}`)
-      .then(r => r.json())  // ⭐ Primero obtener como JSON
-      .then(data => {
-        const parsed = JSON.parse(data);  // ⭐ Luego parsear el string
-        setSurveysData(parsed);
-        console.log('📊 Encuestas cargadas:', parsed);
-      })
-      .catch(e => {
-        console.error('Error cargando surveys:', e);
-        setSurveysData(null);
-      });
-  }, [filters.category]);
-
-  // Cargar datos de tracking
-  useEffect(() => {
-    if (!filters.showTracking) return;
-    
-    fetch(`${API_URL}/results/tracking/geojson`)
-      .then(r => r.json())  // ⭐ Primero obtener como JSON
-      .then(data => {
-        const parsed = JSON.parse(data);  // ⭐ Luego parsear el string
-        setTrackingData(parsed);
-        console.log('📍 Tracking cargado:', parsed);
-      })
-      .catch(e => {
-        console.error('Error cargando tracking:', e);
-        setTrackingData(null);
-      });
-  }, [filters.showTracking]);
+    loadAllData();
+  }, []); // ⭐ Solo se ejecuta UNA VEZ al montar
 
   // Inicializar mapa
   useEffect(() => {
@@ -120,6 +116,16 @@ export default function MapResults() {
     };
   }, []);
 
+  // ⭐ Filtrar datos en memoria según la categoría seleccionada
+  const filteredSurveysData = surveysData && filters.category !== 'all'
+    ? {
+        type: 'FeatureCollection',
+        features: surveysData.features.filter(
+          feature => feature.properties.category === filters.category
+        )
+      }
+    : surveysData;
+
   // Actualizar capas
   useEffect(() => {
     if (!mapRef.current) return;
@@ -138,11 +144,11 @@ export default function MapResults() {
     ];
 
     // Capa de encuestas
-    if (filters.showSurveys && surveysData) {
+    if (filters.showSurveys && filteredSurveysData) {
       layers.push(
         new GeoJsonLayer({
           id: 'surveys',
-          data: surveysData,
+          data: filteredSurveysData,
           pointRadiusMinPixels: 8,
           pointRadiusMaxPixels: 12,
           getFillColor: d => CATEGORY_COLORS[d.properties.category] || [255, 255, 255, 200],
@@ -203,7 +209,7 @@ export default function MapResults() {
         overlayRef.current.finalize();
       }
     };
-  }, [surveysData, trackingData, filters]);
+  }, [filteredSurveysData, trackingData, filters.showSurveys, filters.showTracking]); // ⭐ Actualizar cuando cambian los filtros de visualización
 
   // Popup
   useEffect(() => {
@@ -254,6 +260,14 @@ export default function MapResults() {
 
   return (
     <div className="map-results-container">
+      {/* Loading overlay */}
+      {loading && (
+        <div className="loading-overlay">
+          <div className="loading-spinner"></div>
+          <p>Cargando datos...</p>
+        </div>
+      )}
+
       {/* Panel de control */}
       <div className="results-panel">
         <h1>📊 Resultados del Proyecto</h1>
