@@ -474,6 +474,7 @@
     max-height: 40vh;
     bottom: 0;
     top: auto;
+    padding: 16px;
   }
   
   .results-panel.collapsed {
