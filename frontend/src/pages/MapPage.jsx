@@ -14,10 +14,8 @@ export default function MapPage() {
   const [showModal, setShowModal] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
   
-  // ⭐ Ref para controlar que tracking solo inicie una vez
   const trackingInitialized = useRef(false);
   
-  // 📍 Hook de geolocalización mejorado
   const { location, error: geoError, loading: geoLoading, permissionStatus } = useGeolocation();
 
   // Cargar datos del mapa
@@ -30,7 +28,7 @@ export default function MapPage() {
         const data = await res.json();
         setGeojson(JSON.parse(data));
       } catch (err) {
-        console.error("❌ Error fetching GeoJSON:", err);
+        console.error("Error fetching GeoJSON:", err);
       } finally {
         setLoading(false);
       }
@@ -38,36 +36,30 @@ export default function MapPage() {
     loadData();
   }, [userId]);
 
-  // 📍 Iniciar tracking UNA SOLA VEZ cuando tengamos permisos
+  // Iniciar tracking UNA SOLA VEZ cuando tengamos permisos
   useEffect(() => {
-    // Verificar condiciones necesarias
     if (!userId || permissionStatus !== 'granted') {
       return;
     }
 
-    // Solo iniciar si no se ha iniciado antes
     if (!trackingInitialized.current) {
-      console.log('🚀 Iniciando tracking automático para user:', userId);
+      console.log('Iniciando tracking automático para user:', userId);
       trackingService.startTracking(userId);
       setIsTracking(true);
       trackingInitialized.current = true;
     }
 
-    // ⭐ Cleanup: detener tracking SOLO al desmontar el componente
     return () => {
-      // Este cleanup se ejecuta cuando el componente se desmonta completamente
-      console.log('🛑 Desmontando MapPage, deteniendo tracking');
+      console.log('Desmontando MapPage, deteniendo tracking');
       trackingService.stopTracking();
       setIsTracking(false);
-      // ⚠️ NO resetear trackingInitialized aquí para evitar que se reinicie
     };
-  }, [userId, permissionStatus]); // ⚠️ SIN 'location' en dependencias
+  }, [userId, permissionStatus]);
 
   // Manejar antes de cerrar la pestaña/navegador
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      // Enviar puntos pendientes antes de cerrar
-      console.log('⚠️ Cerrando ventana, enviando buffer...');
+      console.log('Cerrando ventana, enviando buffer...');
       trackingService.flushBuffer();
     };
 
@@ -77,6 +69,41 @@ export default function MapPage() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
+
+  // Handler para marcar POI como visitado
+  const handleMarkVisited = async (poiId) => {
+    try {
+      // Registrar en tracking que intentó marcar como visitado
+      if (location) {
+        trackingService.addPoint(location.latitude, location.longitude, location.accuracy);
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/visit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          poi_id: poiId,
+          visited: true,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al marcar como visitado');
+      }
+
+      // Recargar datos del mapa para actualizar el estado
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/assignments_geojson`);
+      const data = await res.json();
+      setGeojson(JSON.parse(data));
+      
+      alert('POI marcado como visitado correctamente');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al marcar como visitado: ' + error.message);
+    }
+  };
 
   if (loading) {
     return (
@@ -97,16 +124,20 @@ export default function MapPage() {
 
   return (
     <>
-      <MapView data={geojson} initialCenter={[-73.0586, -36.8274]} initialZoom={13} />
+      <MapView 
+        data={geojson} 
+        initialCenter={[-73.0586, -36.8274]} 
+        initialZoom={13}
+        userLocation={location}
+        onMarkVisited={handleMarkVisited}
+      />
       
-      {/* Componente de estado de tracking */}
       <TrackingStatus location={location} isTracking={isTracking} />
 
-      {/* Mostrar estado de geolocalización si hay problemas */}
       {geoLoading && (
         <div className="geo-loading">
           <div className="spinner-small"></div>
-          📍 Getting location...
+          Getting location...
         </div>
       )}
       
@@ -123,7 +154,6 @@ export default function MapPage() {
         </div>
       )}
 
-      {/* Botón flotante para encuesta */}
       <button
         type="button"
         className="floating-action-button"
@@ -134,7 +164,6 @@ export default function MapPage() {
         +
       </button>
       
-      {/* Modal de encuesta */}
       {showModal && (
         <SurveyModal 
           onClose={() => setShowModal(false)} 

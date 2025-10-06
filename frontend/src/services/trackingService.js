@@ -7,8 +7,8 @@ class TrackingService {
   constructor() {
     this.buffer = [];
     this.batchSize = 10; // Enviar cada 10 puntos
-    this.intervalMs = 60000; // O cada 60 segundos
-    this.trackingIntervalMs = 60000; // ⭐ Capturar ubicación cada 60 segundos
+    this.intervalMs = 30000; // O cada 30 segundos
+    this.trackingIntervalMs = 30000; // ⭐ Capturar ubicación cada 30 segundos
     this.minDistanceMeters = 10; // Mínimo 10m de distancia para registrar
     this.intervalId = null;
     this.trackingIntervalId = null;

@@ -293,7 +293,13 @@ export default function MapResults() {
         {!panelCollapsed && (
           <>
             <div className="panel-header">
-              <div className="logo-placeholder">🗺️</div>
+              {/* Add your logo here */}
+              <img 
+                src="https://d26q11cgz8q0ri.cloudfront.net/2023/08/21115443/logo-CLBB.png" 
+                alt="Logo"
+                className="panel-logo"
+                style={{ height: 40, marginRight: 12 }}
+              />
               <h1>Resultados Workshop Movilidad</h1>
             </div>
         
