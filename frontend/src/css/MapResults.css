@@ -480,15 +480,10 @@
   /* MAPA ARRIBA - 50% */
   .results-map {
     width: 100%;
-<<<<<<< HEAD
     max-height: 40vh;
     bottom: 0;
     top: auto;
     padding: 16px;
-=======
-    height: 50vh; /* Exactamente la mitad */
-    order: 1;
->>>>>>> origin/frontend
   }
 
   /* PANEL ABAJO - 50% */
