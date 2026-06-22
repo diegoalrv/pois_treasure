@@ -4,6 +4,7 @@ import JoinPage from "./pages/JoinPage";
 import MapPage from "./pages/MapPage";
 import MapResults from "./pages/MapResults";
 import ScanRequired from "./pages/ScanRequired";
+import DisclaimerFooter from "./components/DisclaimerFooter";
 
 // Componente para redirección desde la raíz
 function RootRedirect() {
@@ -25,5 +26,10 @@ export default function App() {
     { path: "/map/:userId", element: <MapPage /> },
     { path: "/results", element: <MapResults /> }, // ⭐ Nueva ruta
   ]);
-  return routes;
+  return (
+    <>
+      {routes}
+      <DisclaimerFooter />
+    </>
+  );
 }

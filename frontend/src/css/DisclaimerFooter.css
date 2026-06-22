@@ -1,0 +1,86 @@
+/* Banner footer fijo, presente en todas las vistas */
+.disclaimer-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: rgba(20, 20, 20, 0.92);
+  color: #bbb;
+  font-size: 12px;
+  border-top: 1px solid rgba(254, 195, 31, 0.3);
+  backdrop-filter: blur(4px);
+}
+.disclaimer-readmore {
+  background: transparent;
+  border: none;
+  color: #fec31f;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+.disclaimer-readmore:hover {
+  color: #ffd34d;
+}
+
+/* Modal disclaimer */
+.info-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10003;
+  padding: 16px;
+}
+.info-modal {
+  position: relative;
+  background: #1c1c1c;
+  color: #eaeaea;
+  max-width: 520px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  padding: 28px 28px 22px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(254, 195, 31, 0.3);
+}
+.info-modal h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+  color: #fec31f;
+}
+.info-modal p {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.info-modal .info-contact {
+  margin-top: 18px;
+  font-size: 12px;
+  color: #888;
+  text-align: right;
+}
+.info-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: transparent;
+  border: none;
+  color: #aaa;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+.info-close:hover {
+  color: #fff;
+}
